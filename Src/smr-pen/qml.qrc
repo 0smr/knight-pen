@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Controls/Button.qml</file>
+        <file>Forms/MainForm.qml</file>
+        <file>Forms/SettingForm.qml</file>
+        <file>Forms/BaseForm.qml</file>
+        <file>Controls/Hamburger.qml</file>
+        <file>Controls/Grid.qml</file>
+        <file>Windows/WinItem.qml</file>
+        <file>Windows/ColorPickerWindow.qml</file>
+        <file>Resources/Icons/icon-dark.svg</file>
+        <file>Resources/Icons/icon-light.svg</file>
+        <file>Controls/InteractiveCanvas.qml</file>
+        <file>Resources/Cursor/DirectSelection.svg</file>
+        <file>Resources/Cursor/Selection.svg</file>
+        <file>Windows/CanvasWindow.qml</file>
+    </qresource>
+</RCC>
