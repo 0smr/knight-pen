@@ -4,20 +4,24 @@
 A simple screen annotation software.
 
 <div align="center">
-    <h2>Knight Pen</h2>
-    <img src="Extera/Logo/logo-name-knight-pen.webp" with="200px" height="100px"><br>
+    <img src="extera/logo/logo-name-knight-pen.webp" width="500px"><br>
 </div>
 
+# Preview
+no previews provided yet.
 
 ## TO-DO
-- [ ] Fix dragging with the left button.
+- [x] Custom <a href="extera/icon-font">icon-font</a>.
+- [ ] Fix dragging issues.
 - [ ] Add shape selection.
-- [ ] Add brush tool.
-- [ ] Move selection.
-- [ ] Rotate selection.
-- [ ] Resize selection.
-- [ ] Translate selection.
-- [ ] Custom font icon.
+- [ ] Add other pen & brush tools.
+- [ ] Capability to move selection.
+- [ ] Capability to rotate selection.
+- [ ] Capability to resize selection.
+- [ ] Capability to translate selection.
+- [ ] Capability to intersect shapes.
+- [ ] move InteractiveCanvas component to separate repository.
 
 ## Dependencies
 - [Qt](https://www.qt.io/) (LGPLV3) <sub>Core & GUI</sub>
+- [QNanoPainter](https://github.com/QUItCoding/qnanopainter) (zlib license) <sub>Canvas</sub>
