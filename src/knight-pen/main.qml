@@ -12,50 +12,49 @@ import knight.pen.window 1.0
 import 'Controls'
 import 'Forms'
 
-ApplicationWindow {
+TileMaskWindow {
     id: window
 
     property var externalItems: []
 
-    width: mainform.width
-    height: mainform.height
+    width: 300
+    height: 300
 
     visible: true
-    flags: Qt.WindowStaysOnTopHint |
-           Qt.FramelessWindowHint |
-           Qt.Widget
-    color: 'transparent'
 
-    contentData:
+    /// mask configuration begin
+    rows: 11
+    columns: 11
+    transposed: mainform.flow == Grid.TopToBottom ?
+                    TileMaskWindow.None : TileMaskWindow.SecondaryTranspose
+    function setMaskRow(row, val) {
+        let to = [0, 0, 5, 4, 0, 0, 0, 2, 6, 0, 0];
+        window.setMaskArea(row, 10 - to[row], row, 9, val);
+    }
+    Component.onCompleted: { window.setMaskArea(0, 10, 10, 10); }
+    /// mask configuration end
+
+    Item {
+        anchors.fill: parent
         MainForm {
             id: mainform
-        }
-
-    /**
-     * FIXME: use window.startSystemMove() instead of manually change the window position.
-     * FIXME: fix draging window using mouse left button.
-     */
-    MouseArea {
-        property point clickPoint
-        anchors.fill: parent
-        acceptedButtons: Qt.RightButton
-        cursorShape: containsPress ? Qt.ClosedHandCursor : Qt.ArrowCursor
-        onPositionChanged: {
-            if(drag.active) {
-                var p = mapFromGlobal(Qt.point(-mouseX,-mouseY))
-                window.x = -p.x + clickPoint.x
-                window.y = -p.y + clickPoint.y
-                for(var item of externalItems) {
-                    if(item.visible) {
-                        item.updateExternalWindowPosition();
-                    }
-                }
+            anchors {
+                top: parent.top
+                right: parent.right
+                rightMargin: 2
+                topMargin: 2
             }
         }
+    }
 
-        drag.target: this
-        drag.onActiveChanged: clickPoint = Qt.point(-mouseX,-mouseY)
-        drag.threshold: 0
+    DragHandler {
+        target: null
+        dragThreshold: 1
+        onActiveChanged: {
+            if(active) {
+                window.startSystemMove();
+            }
+        }
     }
 
     SystemTrayIcon {

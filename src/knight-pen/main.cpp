@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<utils>("knight.pen.utils", 1, 0, "Utils");
-    qmlRegisterType<maskWindow>("knight.pen.window", 1, 0, "TransparentWindow");
+    qmlRegisterType<tileMaskWindow>("knight.pen.window", 1, 0, "TileMaskWindow");
     qmlRegisterType<nanoknight::nanoCanvas>("knight.pen.canvas", 1, 0, "NanoCanvas");
 
     QQmlApplicationEngine engine;

@@ -10,7 +10,7 @@ QQC.Button {
                              implicitContentHeight + topPadding + bottomPadding)
 
     property color color: '#555'
-    property color backgroundColor: '#eee'
+    property color bgColor: '#eee'
 
     width: 25
     height: width
@@ -18,15 +18,20 @@ QQC.Button {
     padding: 6
     spacing: 6
 
+    FontLoader {
+        id: knightFont
+        source: '../Resources/Font/knight-icon.ttf'
+    }
+
     font {
         bold: true
-        pixelSize: width * 0.6
-        family: 'Font Awesome 5 Free Solid'
+        pixelSize: width * 0.65
+        family: knightFont.name
     }
 
     palette {
-        base: backgroundColor
-        button: backgroundColor
+        base: bgColor
+        button: bgColor
         buttonText: enabled ? control.color : Qt.lighter(control.color, 1.4)
         brightText: enabled ? control.color : Qt.lighter(control.color, 1.4)
     }
@@ -42,8 +47,7 @@ QQC.Button {
 
         border {
             color: control.checked ? '#89c7f5' : Qt.darker(control.palette.button, 1.3)
-            width: control.focus ? 3 : 1
-
+            width: control.focus ? 2 : 1
             Behavior on width { NumberAnimation {duration: 100} }
         }
     }
