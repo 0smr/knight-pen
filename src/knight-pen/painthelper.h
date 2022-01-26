@@ -38,13 +38,8 @@ public:
         if(pen.mStroke == true) painter->stroke();
     }
 
-    static void drawAnchors(QNanoPainter *painter, const std::shared_ptr<pathShape> &path, nanoPen pen, float revscale = 1.0) {
-        pen.mFill = true;
-        for(const auto &point: path->pointSeries()) {
-            QRectF rect(point - QPointF(1.5, 1.5) * revscale, QSizeF(3.0, 3.0) * revscale);
-            pen.mFillColor = point.selected() ? pen.mStrokeColor : QColor(255,255,255);
-            drawRect(painter, rect, pen);
-        }
+    static void drawAnchors(QNanoPainter *painter, const std::shared_ptr<pathShape> &path, const nanoPen &pen, float revscale = 1.0) {
+        drawAnchors(painter, *path, pen, revscale);
     }
 
     static void drawAnchors(QNanoPainter *painter, const pathShape &path, nanoPen pen, float revscale = 1.0) {
@@ -99,6 +94,14 @@ public:
         painter->lineTo(line.p2());
         if(pen.mFill == true) painter->fill();
         if(pen.mStroke == true) painter->stroke();
+    }
+
+    static void drawPoint(QNanoPainter *painter, const QPointF &point, const nanoPen &pen, float revscale = 1.0) {
+        /// @brief draw two crossing lines.
+        QLineF vLine(point - QPointF(2, 2) * revscale, point + QPointF(2, 2) * revscale);
+        QLineF hLine(point - QPointF(2, -2) * revscale, point + QPointF(2, -2) * revscale);
+        drawLine(painter, vLine, pen);
+        drawLine(painter, hLine, pen);
     }
 };
 }

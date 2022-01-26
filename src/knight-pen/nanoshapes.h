@@ -181,6 +181,7 @@ public:
 
     virtual void setBoundingBox(const QRectF &boundingBox) { mBoundingBox = boundingBox; }
     virtual void resetBoundingBox() { }
+    virtual bool isNull() const { return true; }
     virtual const QRectF &updateBoundingBox() { return mBoundingBox; }
 
 protected:
@@ -193,6 +194,7 @@ protected:
 /**
  * @brief The freePath struct
  * NOTE: what if every thing was pathShape? ...
+ * TODO: use https://gitlab.com/inkscape/inkscape/-/tree/master/src/path
  */
 class pathShape : public shape {
 public:
@@ -258,6 +260,11 @@ public:
 
     ShapeType type() const override { return ShapeType::Path; }
     /**
+     * @brief isNull
+     * smae as empty.
+     */
+    bool isNull() const override { return mPointSeries.empty(); }
+    /**
      * TODO: path contains point - set bounding box.
      * PointState contains(const QPointF &point) const override { return PointState::None; }
      * void setBoundingBox(const QRectF &boundingBox) override {}
@@ -317,9 +324,7 @@ public:
     /// operator pathShape() const {}
     /// operator = () const {}
 
-    operator QRectF() const {
-        return mBoundingBox;
-    }
+    operator QRectF() const { return mBoundingBox; }
 
     void setBoundingBox(const QRectF &boundingBox) override {
         shape::setBoundingBox(boundingBox);
@@ -336,6 +341,7 @@ public:
     }
 
     ShapeType type() const override { return ShapeType::Ellipse; }
+    bool isNull() const override { return mRadius.isNull(); }
 
     PointState contains(const QPointF &point) const override {
         QPointF rtpoint = revTransformer().map(point);
@@ -362,7 +368,6 @@ public:
     /// TODO: constexpr.
     bool isCircle() const { return mRadius.width() == mRadius.height(); }
     float maxRadius() const { return std::max(mRadius.width(), mRadius.height()); }
-    bool isNull() const { return mCenter == QPointF(0.0f, 0.0f) && mRadius == QSizeF(0.0f, 0.0f); }
 
     /// setters
     void setTopLeft(const QPointF &newPoint) {
@@ -411,16 +416,42 @@ class rectShape: public QRectF, public shape {
 public:
     rectShape() : rectShape(QRectF()) {}
     rectShape(const QRectF &rect, const nanoPen &pen = nanoPen())
-        : QRectF(rect), shape(pen), mAnchors () {}
+        : QRectF(rect), shape(pen), mSelectedAnchors() {}
     rectShape(const QPointF &topLeft, const QPointF &bottomRight, const nanoPen &pen = nanoPen())
-        : QRectF(topLeft, bottomRight), shape(pen), mAnchors () {}
+        : QRectF(topLeft, bottomRight), shape(pen), mSelectedAnchors() {}
 
     // rectShape &operator = (const rectShape &rect) TODO: Is this really necessary?
 
     operator pathShape() const {
-        pathShape ps(mPen, true);
-        ps.setPointSeries(std::vector<APointF>(mAnchors.begin(), mAnchors.end()));
-        return ps;
+        pathShape path(mPen, true);
+
+        /**
+         *  position anchros depend on corner radiuses.
+         *  FIXME: set corners handlers.
+         *  FIXME: apply shape rotate on points.
+         *
+         *    ┌─A1────────A2─┐
+         *   A0 R0        R1 A3
+         *    │              │
+         *    │       ∙      │
+         *    │              │
+         *   A7 R3        R2 A4
+         *    └─A6────────A5─┘
+         *
+         */
+        std::vector<APointF> anchors {
+            mBoundingBox.topLeft() + QPointF(0, mCornerRadius[0]),
+            mBoundingBox.topLeft() + QPointF(mCornerRadius[0], 0),
+            mBoundingBox.topRight() + QPointF(-mCornerRadius[1], 0),
+            mBoundingBox.topRight() + QPointF(0, mCornerRadius[1]),
+            mBoundingBox.bottomLeft() + QPointF(0, -mCornerRadius[2]),
+            mBoundingBox.bottomLeft() + QPointF(-mCornerRadius[2], 0),
+            mBoundingBox.bottomRight() + QPointF(mCornerRadius[3], 0),
+            mBoundingBox.bottomRight() + QPointF(0, -mCornerRadius[3]),
+        };
+
+        path.setPointSeries(anchors);
+        return path;
     }
 
     const QRectF &updateBoundingBox() override {
@@ -430,6 +461,7 @@ public:
     }
 
     ShapeType type() const override { return ShapeType::Rectangle; }
+    bool isNull() const override { return QRectF::isNull(); }
 
     QPointF center() const { return QRectF::center(); }
 
@@ -454,10 +486,6 @@ public:
         }
     }
 
-    bool isNull() const {
-        return QRectF::isNull() && topLeft() == QPointF(0.0, 0.0);
-    }
-
     /// setters
     void setBoundingBox(const QRectF &boundingBox) override {
         shape::setBoundingBox(boundingBox);
@@ -473,15 +501,15 @@ public:
         setBottomRight(rect.bottomRight());
     }
     void setCornerRadius(const std::array<float, 4> &newCornerRadius) { mCornerRadius = newCornerRadius; }
-    void setAnchors(const std::array<APointF, 8> &newAnchors) { mAnchors = newAnchors; }
+    void setSelectedAnchors(const std::array<bool, 8> &newAnchors) { mSelectedAnchors = newAnchors; }
 
     /// getters
     const std::array<float, 4> &cornerRadius() const { return mCornerRadius; }
-    const std::array<APointF, 8> &anchors() const { return mAnchors; }
+    pathShape selectedAnchors() const { return *this; }
 
 private:
     std::array<float, 4> mCornerRadius;
-    std::array<APointF, 8> mAnchors;
+    std::array<bool, 8> mSelectedAnchors;
 };
 
 /**
@@ -495,8 +523,9 @@ public:
         : lineShape(QLineF(p1, p2), pen) {}
 
     operator pathShape() const {
-        pathShape paths(mPen, true);
-        paths.setPointSeries(std::vector<APointF>(mAnchors.begin(), mAnchors.end()));
+        pathShape paths(*this, mPen);
+        paths[0].setSelected(mAnchors[0]);
+        paths[0].setSelected(mAnchors[1]);
         return paths;
     }
 
@@ -507,6 +536,7 @@ public:
     }
 
     ShapeType type() const override { return ShapeType::Line; }
+    bool isNull() const override { return QLineF::isNull(); }
 
     PointState contains(const QPointF &point) const override {
         QPointF p = p1() - point;
@@ -514,7 +544,7 @@ public:
     }
 
 private:
-    std::array<APointF, 2> mAnchors;
+    std::array<bool, 2> mAnchors;
 };
 
 /**
@@ -523,7 +553,7 @@ private:
  *  all edges have same length.
  *  all corners have same angle.
  *
- *      class polygonShape : public pathShape {}
+ *  class polygonShape : public pathShape {}
  */
 
 /// TODO: detect if shape intersects other shape.

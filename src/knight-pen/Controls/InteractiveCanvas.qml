@@ -23,7 +23,6 @@ Item {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         hoverEnabled: true
-        property real sf: 1.0
 
         onWheel: {
             /**
@@ -49,8 +48,6 @@ Item {
             if(mouse.button == Qt.RightButton) {
                 if(nanocanvas.selectedTool == NanoCanvas.Path){
                     nanocanvas.stopDrawing();
-                } else {
-                    nanocanvas.cancelDrawing();
                 }
             } else {
                 switch(nanocanvas.selectedTool) {
@@ -59,6 +56,9 @@ Item {
                     break;
                 case NanoCanvas.Rectangle:
                     nanocanvas.addRect(Qt.point(mouseX, mouseY));
+                    break;
+                case NanoCanvas.Line:
+                    nanocanvas.addLine(Qt.point(mouseX, mouseY));
                     break;
                 case NanoCanvas.Ellipse:
                     nanocanvas.addEllipse(Qt.point(mouseX, mouseY));
@@ -70,7 +70,7 @@ Item {
 
         onReleased: {
             if(nanocanvas.selectedTool != NanoCanvas.Path) {
-                nanocanvas.stopDrawing()
+                nanocanvas.stopDrawing();
             }
         }
     }

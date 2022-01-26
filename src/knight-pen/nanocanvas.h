@@ -91,17 +91,30 @@ public:
 
         for(const auto &shape : mShapes) {
             const auto &pen = shape->pen();
-            switch(shape->type()) {
+            if(shape->isNull() == false) {
+                switch(shape->type()) {
                 case shape::Path:
                     paintHelper::drawPath(painter, std::dynamic_pointer_cast<pathShape>(shape), pen);
-                    if(shape->selected()) {
+                    if(shape->selected() == true) {
                         auto path = std::dynamic_pointer_cast<pathShape>(shape);
+
+                        if(shape != mCurrentShape && path->size() == 1) {
+                            paintHelper::drawPoint(painter, (*path)[0], mSelectPen, 1/mScaleFactor);
+                            break;
+                        }
+
                         paintHelper::drawPath(painter, path, mSelectPen);
                         paintHelper::drawAnchors(painter, *path, mSelectPen, 1/mScaleFactor);
                     }
                     break;
 
                 case shape::Line:
+                    paintHelper::drawLine(painter, std::dynamic_pointer_cast<lineShape>(shape), pen);
+                    if(shape->selected() == true) {
+                        auto line = std::dynamic_pointer_cast<lineShape>(shape);
+                        paintHelper::drawLine(painter, line, mSelectPen);
+                        paintHelper::drawAnchors(painter, *line, mSelectPen, 1/mScaleFactor);
+                    }
                     break;
 
                 case shape::Polygon:
@@ -109,7 +122,7 @@ public:
 
                 case shape::Ellipse:
                     paintHelper::drawEllipse(painter, std::dynamic_pointer_cast<ellipseShape>(shape), pen);
-                    if(shape->selected()) {
+                    if(shape->selected() == true) {
                         paintHelper::drawEllipse(painter, std::dynamic_pointer_cast<ellipseShape>(shape), mSelectPen);
                     }
                     break;
@@ -124,6 +137,7 @@ public:
                 case shape::Shape:
                 default:
                     break;
+                }
             }
         }
 
@@ -222,7 +236,6 @@ public:
          * visualize current draw on mouse move.
          */
         mouseMoves();
-
         update();
     }
 
@@ -252,7 +265,10 @@ private slots:
             } break;
 
             case shape::Polygon:
-            case shape::Line:
+            case shape::Line: {
+                auto line = std::dynamic_pointer_cast<lineShape>(mCurrentShape);
+                line->setP2(mMouse);
+            } break;
             case shape::Path:
             default:
                 break;
@@ -327,8 +343,12 @@ public slots:
 
     void stopDrawing() {
         if(mCurrentShape) {
-            mSelectedShapes.push_back(mCurrentShape);
-            mCurrentShape.reset();
+            if(mCurrentShape->isNull()) {
+                cancelDrawing();
+            } else {
+                mSelectedShapes.push_back(mCurrentShape);
+                mCurrentShape.reset();
+            }
         }
         update();
     }
