@@ -8,9 +8,9 @@ CONFIG += c++17
 include(Third party/qnanopainter/libqnanopainter/include.pri)
 
 SOURCES += \
+        knightcanvas.cpp \
         main.cpp \
         maskwindow.cpp \
-        nanocanvas.cpp \
         nanopainter.cpp \
         painthelper.cpp \
         utils.cpp
@@ -30,8 +30,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    knightcanvas.h \
     maskwindow.h \
-    nanocanvas.h \
     nanopainter.h \
     nanopen.h \
     nanoshapes.h \

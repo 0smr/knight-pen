@@ -15,12 +15,12 @@ Control {
     width: mainLayout.width
     height: mainLayout.height
 
-    property alias canvas: canvasWindow.canvas
+    property alias canvas: canvasWindow.knightcanvas
     property alias flow: mainLayout.flow
 
     CanvasWindow {
         id: canvasWindow
-        canvas.strokeColor: colorValue.color
+        knightcanvas.strokeColor: colorValue.color
     }
 
     ColorPickerWindow {
@@ -54,7 +54,7 @@ Control {
 
                 Hamburger {
                     palette.mid: parent.palette.buttonText
-                    checked: parent.checked
+                    state: parent.checked ? "collapse" : "expand"
                     anchors.fill: parent
                     anchors.margins: 5
                 }
@@ -98,12 +98,12 @@ Control {
                         visible: drawTools.checked
                         itemPerRow: 1
 
-                        Button { text: '\ue000'; onClicked: canvas.selectedTool = NanoCanvas.Rectangle } // rectangle
-                        // Button { text: '\uf312'; onClicked: canvas.selectedTool = NanoCanvas.Polygon } // Polygon
-                        Button { text: '\ue003'; onClicked: canvas.selectedTool = NanoCanvas.Ellipse } // ellipse
-                        Button { text: '\ue005'; onClicked: canvas.selectedTool = NanoCanvas.Line } // line
-                        // Button { text: '\uf30b'; onClicked: canvas.selectedTool = NanoCanvas.Arrow } // arrow
-                        Button { text: '\ue026'; onClicked: canvas.selectedTool = NanoCanvas.Path } // path
+                        Button { text: '\ue000'; onClicked: canvas.selectedTool = KnightCanvas.Rectangle } // rectangle
+                        // Button { text: '\uf312'; onClicked: canvas.selectedTool = KnightCanvas.Polygon } // Polygon
+                        Button { text: '\ue003'; onClicked: canvas.selectedTool = KnightCanvas.Ellipse } // ellipse
+                        Button { text: '\ue005'; onClicked: canvas.selectedTool = KnightCanvas.Line } // line
+                        // Button { text: '\uf30b'; onClicked: canvas.selectedTool = KnightCanvas.Arrow } // arrow
+                        Button { text: '\ue026'; onClicked: canvas.selectedTool = KnightCanvas.Path } // path
 
                         // Button { text: '\uf305'; } // selection
                         // Button { text: '\uf040'; } // marker
@@ -193,6 +193,7 @@ Control {
                         id: operations;
                         text: '\ue054';
                         checkable: true
+                        enabled: false
                         onCheckedChanged: Window.window.setMaskRow(7, checked)
                     }
 
@@ -217,6 +218,7 @@ Control {
                         property int index: 0
                         text: '\ue033';
                         checkable: true
+                        enabled: false
                         onCheckedChanged: Window.window.setMaskRow(8, checked)
                     }
 
@@ -247,8 +249,8 @@ Control {
                     }
                 }
 
-                Button { id: save; text: '\ue031'; }
-                Button { id: copy; text: '\ue037'; }
+                Button { id: save; text: '\ue031'; enabled: false }
+                Button { id: copy; text: '\ue037'; enabled: false }
             }
         }
 }

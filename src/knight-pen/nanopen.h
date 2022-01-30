@@ -3,7 +3,7 @@
 #include <QPen>
 #include "qnanopainter.h"
 
-namespace nanoknight {
+namespace knightPen {
 /**
  * @brief The nanoPen struct
  */
@@ -26,7 +26,7 @@ struct nanoPen {
 
     void  setToPainter(QNanoPainter *painter) const {
         /**
-         * TODO: Enable pattern for style.
+         * TODO: add pattern as style.
          */
         painter->setFillStyle(QNanoColor::fromQColor(mFillColor));
         painter->setStrokeStyle(QNanoColor::fromQColor(mStrokeColor));

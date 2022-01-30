@@ -2,7 +2,7 @@
 #include <QQmlApplicationEngine>
 
 #include "utils.h"
-#include "nanocanvas.h"
+#include "knightcanvas.h"
 #include "maskwindow.h"
 
 int main(int argc, char *argv[]) {
@@ -13,7 +13,11 @@ int main(int argc, char *argv[]) {
 
     qmlRegisterType<utils>("knight.pen.utils", 1, 0, "Utils");
     qmlRegisterType<tileMaskWindow>("knight.pen.window", 1, 0, "TileMaskWindow");
-    qmlRegisterType<nanoknight::nanoCanvas>("knight.pen.canvas", 1, 0, "NanoCanvas");
+    qmlRegisterType<knightPen::knightCanvas>("knight.pen.canvas", 1, 0, "KnightCanvas");
+
+    app.setApplicationDisplayName(QStringLiteral("Knight Pen"));
+    app.setApplicationVersion(QStringLiteral("0.1.1"));
+    app.setOrganizationDomain(QStringLiteral("https://smr76.github.io"));
 
     QQmlApplicationEngine engine;
 

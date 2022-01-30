@@ -2,19 +2,19 @@
 
 #include "qnanoquickitempainter.h"
 #include "qnanopainter.h"
-#include "nanocanvas.h"
+#include "knightcanvas.h"
 
-namespace nanoknight {
+namespace knightPen {
 
-class nanoCanvas;
+class knightCanvas;
 
 class nanoPainter : public QNanoQuickItemPainter {
 public:
     nanoPainter();
     void paint(QNanoPainter *p) override;
-    void setCanvas(const nanoCanvas* canvas);
+    void setCanvas(const knightCanvas* canvas);
 
 private:
-    const nanoCanvas* mCanvas;
+    const knightCanvas* mCanvas;
 };
 }

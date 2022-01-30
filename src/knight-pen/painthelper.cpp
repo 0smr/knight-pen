@@ -1,6 +1,6 @@
 #include "painthelper.h"
 
-namespace nanoknight {
+namespace knightPen {
 paintHelper::paintHelper() {}
 
 }

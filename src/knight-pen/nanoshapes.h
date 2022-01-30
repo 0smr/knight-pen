@@ -10,7 +10,7 @@ struct ellipseShape;
 struct lineShape;
 struct rectShape;
 
-namespace nanoknight {
+namespace knightPen {
 
 enum PointProxy {
     Center,
@@ -36,7 +36,7 @@ enum PointState {
  */
 class APointF : public QPointF {
 public:
-    constexpr APointF(const QPointF &p = QPoint(),
+    constexpr APointF(const QPointF &p = QPointF(),
         const QPointF &cp1 = QPointF(),
         const QPointF &cp2 = QPointF())
         : QPointF(p), mControl1(cp1), mControl2(cp2), mSelected(false) {}
@@ -45,6 +45,11 @@ public:
           mControl1(p.mControl1),
           mControl2(p.mControl2),
           mSelected(p.mSelected) {}
+    constexpr APointF(float x, float y,
+        bool selected = false,
+        const QPointF &cp1 = QPointF(),
+        const QPointF &cp2 = QPointF())
+        : QPointF(x, y), mControl1(cp1), mControl2(cp2), mSelected(selected) {}
 
     const APointF &operator =(const APointF &in) {
         setX(in.x());
@@ -78,12 +83,12 @@ public:
         return *this;
     }
 
-    APointF &rotate(const float &angle, const QPointF &origin = QPointF(0.0, 0.0)) {
+    APointF &rotate(float angle, const QPointF &origin = QPointF(0.0, 0.0)) {
         APointF::rotate(*this, angle, origin);
         return *this;
     }
 
-    static QPointF rotate(const QPointF &p, const float &angle, const QPointF &origin = QPointF(0.0, 0.0)) {
+    static QPointF rotate(const QPointF &p, float angle, const QPointF &origin = QPointF(0.0, 0.0)) {
         QTransform transform = QTransform()
                                    .translate(origin.x(), origin.y())
                                    .rotate(angle)
@@ -120,7 +125,7 @@ public:
     constexpr shape(const QRectF &rect,
         const nanoPen &pen = nanoPen(),
         const bool &selected = false,
-        const float &angle = 0.0f)
+        float angle = 0.0f)
         : mBoundingBox(rect),
           mPen(pen),
           mSelected(selected),
@@ -130,12 +135,12 @@ public:
         const QPointF p2,
         const nanoPen &pen = nanoPen(),
         const bool &selected = false,
-        const float &angle = 0.0f)
+        float angle = 0.0f)
         : shape(QRectF(p1, p2), pen, selected, angle) {}
 
     constexpr shape(const nanoPen &pen,
         const bool &selected = false,
-        const float &angle = 0.0f)
+        float angle = 0.0f)
         : shape(QRectF(), pen, selected, angle) {}
 
     QTransform transformer() const {
@@ -166,9 +171,9 @@ public:
     }
 
     /// getters
-    const QRectF &boundingBox() const { return mBoundingBox; }
     bool selected() const { return mSelected; }
     float angle() const { return mAngle; }
+    const QRectF &boundingBox() const { return mBoundingBox; }
     const nanoPen &pen() const { return mPen; }
 
     virtual PointState contains(const QPointF &point) const { Q_UNUSED(point) return PointState::None; }
@@ -180,8 +185,7 @@ public:
     void setPen(const nanoPen &newPen) { mPen = newPen; }
 
     virtual void setBoundingBox(const QRectF &boundingBox) { mBoundingBox = boundingBox; }
-    virtual void resetBoundingBox() { }
-    virtual bool isNull() const { return true; }
+    virtual bool isNull() const { return mBoundingBox.isNull(); }
     virtual const QRectF &updateBoundingBox() { return mBoundingBox; }
 
 protected:
@@ -234,14 +238,12 @@ public:
     APointF &operator[](size_t index) { return mPointSeries.at(index); }
     const APointF &operator[](size_t index) const { return mPointSeries.at(index); }
 
-    void resetBoundingBox() override {
-        if(mAngle != 0) {
-            for(auto &point : mPointSeries) {
-                point.transform(transformer());
-            }
-        }
-        mAngle = 0;
-        updateBoundingBox();
+    std::vector<APointF>::iterator begin() {
+        return mPointSeries.begin();
+    }
+
+    std::vector<APointF>::iterator end() {
+        return mPointSeries.end();
     }
 
     const QRectF &updateBoundingBox() override {
@@ -258,6 +260,21 @@ public:
         return mBoundingBox;
     }
 
+    /**
+     * @brief resetBoundingBox
+     * Sets angle to zero, and changes points and thier controls depend on shape rotation.
+     * NOTE: only pathShape can reset it's bounding box.
+     */
+    void resetBoundingBox() {
+        if(mAngle != 0) {
+            for(auto &point : mPointSeries) {
+                point.transform(transformer());
+            }
+        }
+        mAngle = 0;
+        updateBoundingBox();
+    }
+
     ShapeType type() const override { return ShapeType::Path; }
     /**
      * @brief isNull
@@ -265,7 +282,7 @@ public:
      */
     bool isNull() const override { return mPointSeries.empty(); }
     /**
-     * TODO: path contains point - set bounding box.
+     * TODO: Add following functions:
      * PointState contains(const QPointF &point) const override { return PointState::None; }
      * void setBoundingBox(const QRectF &boundingBox) override {}
      */
@@ -283,6 +300,7 @@ public:
     /// getters
     bool empty() const { return mPointSeries.empty(); }
     bool closed() const { return mClosed; }
+    bool isSinglePoint() const { return size() == 1; }
     pathShape::Arows arrow() const { return mArrows; }
     const std::vector<APointF> &pointSeries() const { return mPointSeries; }
     QPointF center() const { return mBoundingBox.center(); }
@@ -302,29 +320,51 @@ public:
     ellipseShape(const QPointF &center = QPointF(0.0, 0.0),
         const QSizeF &radius = QSizeF(0.0, 0.0),
         const nanoPen &pen = nanoPen())
-        : shape(QRectF(center - QPointF(radius.width(), radius.height()),
-                    radius * 2),
-              pen),
+        : shape(QRectF(center - QPointF(radius.width(), radius.height()), radius * 2), pen),
           mCenter(center),
-          mRadius(radius) {}
+          mRadius(radius),
+          mSelectedAnchors({}) {}
+    ellipseShape(const QRectF &rect, const nanoPen &pen = nanoPen())
+        : shape(rect, pen),
+          mCenter(rect.center()),
+          mRadius(rect.size() / 2),
+          mSelectedAnchors({}) {}
     ellipseShape(const QPointF &center,
-        const float &radius = 1,
+        float radius = 1,
         const nanoPen &pen = nanoPen())
         : ellipseShape(center, QSizeF(radius, radius), pen) {}
-
-    ellipseShape(const QRectF &rect,
-        const nanoPen &pen = nanoPen())
-        : shape(rect, pen), mCenter(rect.center()), mRadius(rect.size()/2) {}
     ellipseShape(const QPointF &topLeft,
         const QPointF &bottomRight,
         const nanoPen &pen = nanoPen())
         : ellipseShape(QRectF(topLeft, bottomRight), pen) {}
 
-    /// TODO complete implementation.
-    /// operator pathShape() const {}
-    /// operator = () const {}
+    /**
+     * TODO: Add following functions:
+     * operator = () const {}
+     */
 
-    operator QRectF() const { return mBoundingBox; }
+    operator pathShape() const {
+        pathShape ps(mPen, true);
+
+        APointF();
+
+        ps.setPointSeries({
+            (mBoundingBox.topLeft() + mBoundingBox.topRight()) / 2,
+            (mBoundingBox.topRight() + mBoundingBox.bottomRight()) / 2,
+            (mBoundingBox.bottomRight() + mBoundingBox.bottomLeft()) / 2,
+            (mBoundingBox.bottomLeft() + mBoundingBox.topLeft()) / 2,
+        });
+        for(size_t i = 0; i < mSelectedAnchors.size(); ++i) {
+            ps[i].setSelected(mSelectedAnchors[i]);
+        }
+        ps.setAngle(angle());
+        ps.resetBoundingBox();
+        return ps;
+    }
+
+    operator QRectF() const {
+        return mBoundingBox;
+    }
 
     void setBoundingBox(const QRectF &boundingBox) override {
         shape::setBoundingBox(boundingBox);
@@ -334,8 +374,7 @@ public:
     }
 
     const QRectF &updateBoundingBox() override {
-        mBoundingBox.setTopLeft(QPointF(
-            mCenter.x() - mRadius.width(), mCenter.y() - mRadius.height()));
+        mBoundingBox.setTopLeft(QPointF(mCenter.x() - mRadius.width(), mCenter.y() - mRadius.height()));
         mBoundingBox.setSize(mRadius * 2);
         return mBoundingBox;
     }
@@ -357,7 +396,7 @@ public:
                    mRadius.width() + otherEllipse.mRadius.width();
         } else {
             /**
-             *  TODO: ellipse-ellipse collision.
+             *  FIXME: Add ellipse-ellipse collision.
              *  https://en.wikipedia.org/wiki/Ellipse
              */
             throw "not implemented";
@@ -406,7 +445,7 @@ public:
 private:
     QPointF mCenter;
     QSizeF mRadius;
-    std::array<APointF, 4> mAnchors;
+    std::array<bool, 4> mSelectedAnchors;
 };
 
 /**
@@ -414,11 +453,10 @@ private:
  */
 class rectShape: public QRectF, public shape {
 public:
-    rectShape() : rectShape(QRectF()) {}
-    rectShape(const QRectF &rect, const nanoPen &pen = nanoPen())
-        : QRectF(rect), shape(pen), mSelectedAnchors() {}
+    rectShape(const QRectF &rect = QRectF(), const nanoPen &pen = nanoPen())
+        : QRectF(rect), shape(pen), mCornerRadius(), mSelectedAnchors() {}
     rectShape(const QPointF &topLeft, const QPointF &bottomRight, const nanoPen &pen = nanoPen())
-        : QRectF(topLeft, bottomRight), shape(pen), mSelectedAnchors() {}
+        : QRectF(topLeft, bottomRight), shape(pen), mCornerRadius(), mSelectedAnchors() {}
 
     // rectShape &operator = (const rectShape &rect) TODO: Is this really necessary?
 
@@ -426,20 +464,16 @@ public:
         pathShape path(mPen, true);
 
         /**
-         *  position anchros depend on corner radiuses.
+         *  Position anchros depend on corner radiuses.
          *  FIXME: set corners handlers.
-         *  FIXME: apply shape rotate on points.
          *
-         *    ┌─A1────────A2─┐
-         *   A0 R0        R1 A3
-         *    │              │
-         *    │       ∙      │
-         *    │              │
-         *   A7 R3        R2 A4
-         *    └─A6────────A5─┘
-         *
+         *    ╭─a1───a2─╮
+         *   a0 r0   r1 a3
+         *    │    ∙    │
+         *   a7 r3   r2 a4
+         *    ╰─a6───a5─╯
          */
-        std::vector<APointF> anchors {
+        path.setPointSeries({
             mBoundingBox.topLeft() + QPointF(0, mCornerRadius[0]),
             mBoundingBox.topLeft() + QPointF(mCornerRadius[0], 0),
             mBoundingBox.topRight() + QPointF(-mCornerRadius[1], 0),
@@ -448,9 +482,10 @@ public:
             mBoundingBox.bottomLeft() + QPointF(-mCornerRadius[2], 0),
             mBoundingBox.bottomRight() + QPointF(mCornerRadius[3], 0),
             mBoundingBox.bottomRight() + QPointF(0, -mCornerRadius[3]),
-        };
+        });
+        path.setAngle(this->angle());
+        path.resetBoundingBox();
 
-        path.setPointSeries(anchors);
         return path;
     }
 
@@ -460,25 +495,24 @@ public:
         return mBoundingBox;
     }
 
+    /// getters
     ShapeType type() const override { return ShapeType::Rectangle; }
     bool isNull() const override { return QRectF::isNull(); }
-
     QPointF center() const { return QRectF::center(); }
-
     float radius() const {
         for(const auto rad : mCornerRadius)
             if(rad != mCornerRadius[0])
                 return NAN;
         return mCornerRadius[0];
     }
-
     PointState contains(const QPointF &point) const override {
         QPointF rtpoint = revTransformer().map(point);
         if(radius() == 0.0f) {
             return QRectF::contains(rtpoint) ? PointState::Inside : PointState::None;
         } else {
+            QRectF::contains(rtpoint);
             /**
-             * TODO: detect if rounded rect contains point.
+             * FIXME: detect if rounded rect contains point.
              * https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
              */
             throw "not implemented";
@@ -492,9 +526,18 @@ public:
         setTopLeft(boundingBox.topLeft());
         setBottomRight(boundingBox.bottomRight());
     }
-
-    void setRectFromCenter(const QPointF &center, const QPointF &corner) {
-        setTopLeft(center - corner / 2);
+    void setTopLeft(const QPointF &p) {
+        QRectF::setTopLeft(p);
+        updateBoundingBox();
+    }
+    void setBottomRight(const QPointF &p) {
+        QRectF::setBottomRight(p);
+        updateBoundingBox();
+    }
+    void setRectFromCenter(const QPointF &center, const QPointF &bottomRight) {
+        /// FIXME
+        setTopLeft(center);
+        setBottomRight(bottomRight);
     }
     void setRect(const QRectF &rect = QRectF()) {
         setTopLeft(rect.topLeft());
@@ -518,15 +561,16 @@ private:
 class lineShape : public QLineF, public shape {
 public:
     lineShape(const QLineF &line = QLineF(), const nanoPen &pen = nanoPen())
-        : QLineF(line), shape(pen) {}
+        : QLineF(line), shape(pen), mP1(false), mP2(false) {}
     lineShape(const QPointF &p1, const QPointF &p2, const nanoPen &pen = nanoPen())
         : lineShape(QLineF(p1, p2), pen) {}
 
     operator pathShape() const {
-        pathShape paths(*this, mPen);
-        paths[0].setSelected(mAnchors[0]);
-        paths[0].setSelected(mAnchors[1]);
-        return paths;
+        pathShape path(*this, mPen);
+        path.setSelected(selected());
+        path[0].setSelected(mP1);
+        path[1].setSelected(mP2);
+        return path;
     }
 
     void setBoundingBox(const QRectF &boundingBox) override {
@@ -537,14 +581,21 @@ public:
 
     ShapeType type() const override { return ShapeType::Line; }
     bool isNull() const override { return QLineF::isNull(); }
-
     PointState contains(const QPointF &point) const override {
         QPointF p = p1() - point;
         return qFuzzyCompare(p.x()/p.y(), dx()/dy()) ? PointState::Edge : PointState::None;
     }
 
+    /// setters
+    void selectP1(bool set = true) { mP1 = set; }
+    void selectP2(bool set = true) { mP2 = set; }
+
+    /// getters
+    bool p1Selected() const { return mP1; }
+    bool p2Selected() const { return mP2; }
+
 private:
-    std::array<bool, 2> mAnchors;
+    bool mP1, mP2;
 };
 
 /**

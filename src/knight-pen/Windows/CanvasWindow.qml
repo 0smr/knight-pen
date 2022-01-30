@@ -7,7 +7,7 @@ import '../Controls'
 ApplicationWindow {
     id: control
 
-    property alias canvas : interactiveCanvas.nanocanvas;
+    property alias knightcanvas : interactiveCanvas.knightcanvas;
 
     property bool acceptInputs : true;
     property bool hidden : visibility == Window.Hidden;
