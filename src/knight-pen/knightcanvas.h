@@ -15,15 +15,16 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 #include "nanopainter.h"
 #include "nanopen.h"
 #include "nanoshapes.h"
 #include "painthelper.h"
 
-namespace nanoknight {
+namespace knightPen {
 
-class nanoCanvas : public QNanoQuickItem {
+class knightCanvas : public QNanoQuickItem {
     Q_OBJECT
     Q_PROPERTY(Tools selectedTool READ selectedTool WRITE setSelectedTool NOTIFY selectedToolChanged)
     Q_PROPERTY(QColor strokeColor READ strokeColor WRITE setStrokeColor NOTIFY strokeColorChanged)
@@ -34,6 +35,8 @@ class nanoCanvas : public QNanoQuickItem {
     Q_PROPERTY(float miterLimit READ miterLimit WRITE setMiterLimit NOTIFY miterLimitChanged)
     Q_PROPERTY(float scaleFactor READ scaleFactor WRITE setScaleFactor NOTIFY scaleFactorChanged)
     Q_PROPERTY(QPointF mouse READ mouse WRITE setMouse NOTIFY mouseChanged)
+    Q_PROPERTY(bool drawing READ drawing CONSTANT)
+
 public:
     Q_ENUMS(PointProxy)
     /**
@@ -74,7 +77,7 @@ public:
     };
     Q_ENUMS(Tools)
 
-    nanoCanvas(QQuickItem *parent = nullptr);
+    knightCanvas(QQuickItem *parent = nullptr);
 
     /**
      * @brief createItemPainter
@@ -88,64 +91,69 @@ public:
      */
     void painter(QNanoPainter *painter) const {
         painter->scale(mScaleFactor);
+        paintHelper::GlobalScale = mScaleFactor;
 
+        /**
+         * @brief draws all shapes.
+         * Draw main shape.
+         */
         for(const auto &shape : mShapes) {
-            const auto &pen = shape->pen();
+            paintHelper::drawShape(painter, shape, shape->pen());
+        }
+
+        /**
+         * @brief draws selection outlines.
+         * Draw shape selection outlines (using selected pen).
+         */
+        for(const auto &shape : mSelectedShapes) {
             if(shape->isNull() == false) {
-                switch(shape->type()) {
-                case shape::Path:
-                    paintHelper::drawPath(painter, std::dynamic_pointer_cast<pathShape>(shape), pen);
-                    if(shape->selected() == true) {
-                        auto path = std::dynamic_pointer_cast<pathShape>(shape);
-
-                        if(shape != mCurrentShape && path->size() == 1) {
-                            paintHelper::drawPoint(painter, (*path)[0], mSelectPen, 1/mScaleFactor);
-                            break;
-                        }
-
-                        paintHelper::drawPath(painter, path, mSelectPen);
-                        paintHelper::drawAnchors(painter, *path, mSelectPen, 1/mScaleFactor);
+                /// If path is a single point.
+                if(shape->type() == shape::Path) {
+                    auto path = std::dynamic_pointer_cast<pathShape>(shape);
+                    if(path->size() == 1) {
+                        paintHelper::drawPoint(painter, (*path)[0], mSelectPen);
+                    } else {
+                        paintHelper::drawShape(painter, shape, mSelectPen);
                     }
-                    break;
-
-                case shape::Line:
-                    paintHelper::drawLine(painter, std::dynamic_pointer_cast<lineShape>(shape), pen);
-                    if(shape->selected() == true) {
-                        auto line = std::dynamic_pointer_cast<lineShape>(shape);
-                        paintHelper::drawLine(painter, line, mSelectPen);
-                        paintHelper::drawAnchors(painter, *line, mSelectPen, 1/mScaleFactor);
-                    }
-                    break;
-
-                case shape::Polygon:
-                    break;
-
-                case shape::Ellipse:
-                    paintHelper::drawEllipse(painter, std::dynamic_pointer_cast<ellipseShape>(shape), pen);
-                    if(shape->selected() == true) {
-                        paintHelper::drawEllipse(painter, std::dynamic_pointer_cast<ellipseShape>(shape), mSelectPen);
-                    }
-                    break;
-
-                case shape::Rectangle:
-                    paintHelper::drawRect(painter, std::dynamic_pointer_cast<rectShape>(shape), pen);
-                    if(shape->selected()) {
-                        paintHelper::drawRect(painter, std::dynamic_pointer_cast<rectShape>(shape), mSelectPen);
-                    }
-                    break;
-
-                case shape::Shape:
-                default:
-                    break;
+                } else {
+                    paintHelper::drawShape(painter, shape, mSelectPen);
                 }
             }
         }
 
-        /// draw path draw guide.
+        /// @brief draws pathShape draw guide.
         if(mCurrentShape && mCurrentShape->type() == shape::Path) {
             auto path = std::dynamic_pointer_cast<pathShape>(mCurrentShape);
             QPointF last = path->pointSeries().back();
             paintHelper::drawLine(painter, QLineF(last, mMouse), mSelectPen);
+        }
+
+        /**
+         * @brief draws shape drawAnchors.
+         * Draw shape anchors only if Tool is direct selection or shape currently is painting.
+         */
+        if(mSelectedTool != Tools::Selection) {
+            for(const auto &shape : mSelectedShapes) {
+                if(shape->isNull() == false) {
+                    /// If "current shape" fill anchor.
+                    paintHelper::drawAnchors(painter, shape, mSelectPen, shape == mCurrentShape);
+                }
+            }
+        }
+
+        /**
+         * @brief draws selected shapes bounding box.
+         */
+        if(mSelectedTool == Tools::Selection && mSelectedShapes.empty() == false) {
+            if(mSelectedShapes.size() == 1) {
+                paintHelper::drawBoundingBox(painter, mSelectedShapes[0], mSelectPen);
+            } else {
+                QRectF selectedBoundingBox;
+                for(const auto &shape : mSelectedShapes) {
+                    selectedBoundingBox = selectedBoundingBox.united(shape->boundingBox());
+                }
+                paintHelper::drawBoundingBox(painter, selectedBoundingBox, mSelectPen);
+            }
         }
 
         /**
@@ -156,35 +164,70 @@ public:
          */
     }
 
+    Q_INVOKABLE void eraseSelected() {
+        for(const auto &selectedShape: mSelectedShapes) {
+            std::remove(mShapes.begin(), mShapes.end(), selectedShape);
+        }
+    }
+
+    Q_INVOKABLE bool joinSelected() {
+        return mSelectedTool == Tools::Selection ? joinSelectedPahtes() : joinSelectedAnchors();
+    }
+    Q_INVOKABLE bool joinSelectedPahtes() { return false; }
+    Q_INVOKABLE bool joinSelectedAnchors() { return false; }
+
+    Q_INVOKABLE bool translateSelecttion(const QPointF &offset) { Q_UNUSED(offset) return false; }
+    Q_INVOKABLE bool translateSelectedAnchors(const QPointF &offset) { Q_UNUSED(offset) return false; }
+    Q_INVOKABLE bool translateSelectedShapes(const QPointF &offset) { Q_UNUSED(offset) return false; }
+
     /**
-     * TODO: erase shapes.
-     * Q_INVOKABLE void erase(const QPointF &point, const float &radius = 1,
-     *                        DrawType etype = DrawType::Vector) {
-     * }
+     * @brief shape selection
+     * Shape selection functions.
+     * Includes:
+     * @li select at specific point.
+     * @li select at specific circle area.
+     * @li select at specific rectangle area.
      */
+    Q_INVOKABLE bool selectAt(const QPointF &point) {
+        return mSelectedTool == Tools::Selection ? selectShapesAt(point) : selectAnchorsAt(point);
+    }
+    Q_INVOKABLE bool selectAnchorsAt(const QPointF &point) { Q_UNUSED(point) return false; }
+    Q_INVOKABLE bool selectShapesAt(const QPointF &point) { Q_UNUSED(point) return false; }
 
-    QPointF revScale(const QPointF &point) { return point / mScaleFactor; }
+    Q_INVOKABLE bool selectAtArea(const QRectF &area) { Q_UNUSED(area) return false; }
+    Q_INVOKABLE bool selectAnchorsAtArea(const QRectF &area) { Q_UNUSED(area) return false; }
+    Q_INVOKABLE bool selectShapesAtArea(const QRectF &area) { Q_UNUSED(area) return false; }
 
+    Q_INVOKABLE bool selectAtArea(const QPointF &area, float radius) { Q_UNUSED(area) Q_UNUSED(radius) return false; }
+    Q_INVOKABLE bool selectAnchorsAtArea(const QPointF &area, float radius) { Q_UNUSED(area) Q_UNUSED(radius) return false; }
+    Q_INVOKABLE bool selectShapesAtArea(const QPointF &area, float radius) { Q_UNUSED(area) Q_UNUSED(radius) return false; }
+
+
+    /**
+     * @brief getter functions.
+     */
     const Tools &selectedTool() const { return mSelectedTool; }
-    const float &strokeWidth() const { return mPen.mWidth; }
+    const QPointF &mouse() const { return mMouse; }
     const QColor &strokeColor() const { return mPen.mStrokeColor; }
     const QColor &fillColor() const { return mPen.mFillColor; }
-    const float &miterLimit() const { return mPen.mMiter; }
+    float strokeWidth() const { return mPen.mWidth; }
+    float miterLimit() const { return mPen.mMiter; }
     Qt::PenCapStyle lineCap() const { return mPen; }
     Qt::PenJoinStyle lineJoin() const { return mPen; }
-    QPointF mouse() const { return mMouse; }
     float scaleFactor() const { return mScaleFactor; }
+    bool drawing() const { return mCurrentShape.use_count() > 0; }
 
+    /**
+     * @brief setter functions.
+     */
     void setSelectedTool(const Tools &newSelectedTool);
-
-    void setStrokeWidth(const float &newWidth) {
+    void setStrokeWidth(float newWidth) {
         if(mPen.mWidth == newWidth || newWidth < 0) return;
         mPen.mWidth = newWidth;
         emit strokeWidthChanged();
         emit penChanged();
         update();
     }
-
     void setStrokeColor(const QColor &newColor) {
         if(mPen.mStrokeColor == newColor) return;
         mPen.mStrokeColor = newColor;
@@ -192,7 +235,6 @@ public:
         emit penChanged();
         update();
     }
-
     void setFillColor(const QColor &newColor) {
         if(mPen.mFillColor == newColor) return;
         mPen.mFillColor = newColor;
@@ -200,15 +242,13 @@ public:
         emit penChanged();
         update();
     }
-
-    void setMiterLimit(const float &newMiterLimit) {
+    void setMiterLimit(float newMiterLimit) {
         if(mPen.mMiter == newMiterLimit || newMiterLimit < 0) return;
         mPen.mMiter = newMiterLimit;
         emit miterLimitChanged();
         emit penChanged();
         update();
     }
-
     void setLineJoin(const Qt::PenJoinStyle &newLineJoin) {
         if(mPen == newLineJoin) return;
         mPen.setJoin(newLineJoin);
@@ -216,7 +256,6 @@ public:
         emit penChanged();
         update();
     }
-
     void setLineCap(const Qt::PenCapStyle &newLineCap) {
         if(mPen == newLineCap) return;
         mPen.setCap(newLineCap);
@@ -224,7 +263,6 @@ public:
         emit penChanged();
         update();
     }
-
     void setMouse(const QPointF &newMouse) {
         const QPointF &rscale = newMouse / mScaleFactor;  // reverse scaled point
         if(mMouse == rscale) return;
@@ -236,9 +274,7 @@ public:
          * visualize current draw on mouse move.
          */
         mouseMoves();
-        update();
     }
-
     void setScaleFactor(float newScaleFactor) {
         if(qFuzzyCompare(mScaleFactor, newScaleFactor) || newScaleFactor < 0.2)
             return;
@@ -248,7 +284,10 @@ public:
         update();
     }
 
-private slots:
+private:
+    /**
+     * private functions.
+     */
     void mouseMoves() {
         if(mCurrentShape.use_count() == 0)
             return;
@@ -264,15 +303,17 @@ private slots:
                 ellipse->setBottomRight(mMouse);
             } break;
 
-            case shape::Polygon:
             case shape::Line: {
                 auto line = std::dynamic_pointer_cast<lineShape>(mCurrentShape);
                 line->setP2(mMouse);
             } break;
+
+            case shape::Polygon:
             case shape::Path:
             default:
                 break;
         }
+        update();
     }
 
 public slots:
@@ -282,6 +323,7 @@ public slots:
             mCurrentShape->setPen(mPen);
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
+            mSelectedShapes.push_back(mCurrentShape);
         }
         update();
     }
@@ -292,6 +334,7 @@ public slots:
             mCurrentShape->setPen(mPen);
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
+            mSelectedShapes.push_back(mCurrentShape);
         }
         update();
     }
@@ -302,6 +345,7 @@ public slots:
             mCurrentShape->setPen(mPen);
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
+            mSelectedShapes.push_back(mCurrentShape);
         }
         update();
     }
@@ -312,6 +356,7 @@ public slots:
             mCurrentShape->setPen(mPen);
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
+            mSelectedShapes.push_back(mCurrentShape);
         } else if(mCurrentShape->type() == shape::Path) {
             auto path = std::dynamic_pointer_cast<pathShape>(mCurrentShape);
             path->pushPoint(point);
@@ -323,13 +368,15 @@ public slots:
         if(mCurrentShape) {
             mCurrentShape->setPen(mPen);
         }
-        for(auto &shape : mSelectedShapes)
+        for(auto &shape : mSelectedShapes) {
             shape->setPen(mPen);
+        }
     }
 
     void clearSelection() {
-        for(auto &shape : mSelectedShapes)
+        for(auto &shape : mSelectedShapes) {
             shape->setSelected(false);
+        }
         mSelectedShapes.clear();
         update();
     }
@@ -346,7 +393,6 @@ public slots:
             if(mCurrentShape->isNull()) {
                 cancelDrawing();
             } else {
-                mSelectedShapes.push_back(mCurrentShape);
                 mCurrentShape.reset();
             }
         }
@@ -354,32 +400,14 @@ public slots:
     }
 
     void cancelDrawing() {
-        if(mShapes.empty() == false && mShapes.back()->selected()) {
+        if(mShapes.empty() == false && mSelectedShapes.empty() == false &&
+                                       mShapes.back()->selected()) {
             mShapes.pop_back();
+            mSelectedShapes.pop_back();
         }
         mCurrentShape.reset();
         update();
     }
-
-    bool joinSelected() {
-        return mSelectedTool == Tools::Selection ? joinSelectedPahtes() : joinSelectedAnchors();
-    }
-    bool joinSelectedPahtes() { return false; }
-    bool joinSelectedAnchors() { return false; }
-
-    bool selectAt(const QPointF &point) {
-        return mSelectedTool == Tools::Selection ? selectShapesAt(point) : selectAnchorsAt(point);
-    }
-    bool selectAnchorsAt(const QPointF &point) { Q_UNUSED(point) return false; }
-    bool selectShapesAt(const QPointF &point) { Q_UNUSED(point) return false; }
-
-    bool selectArea(const QRectF &area) { Q_UNUSED(area) return false; }
-    bool selectAnchorsAtArea(const QRectF &area) { Q_UNUSED(area) return false; }
-    bool selectShapesAtArea(const QRectF &area) { Q_UNUSED(area) return false; }
-
-    bool transferSelecttion(const QPointF &offset) { Q_UNUSED(offset) return false; }
-    bool transferSelectedAnchors(const QPointF &offset) { Q_UNUSED(offset) return false; }
-    bool transferSelectedShapes(const QPointF &offset) { Q_UNUSED(offset) return false; }
 
 signals:
     void selectedToolChanged();
@@ -394,8 +422,6 @@ signals:
     void scaleFactorChanged();
 
 private:
-    /// TODO add selected shape and selected anchors.
-
     /**
      * TODO: classified snap points.
      *  std::vector<QPointF> mSnapPointCentersX;
@@ -406,9 +432,9 @@ private:
      *  nanoPen mSnapGuidePen;
      *
      *  TODO: other type of shapes.
-     *  \li frameBuffer for raster types.
-     *  \li polygonShape.
-     *  \li textShape.
+     *  @li frameBuffer for raster types.
+     *  @li polygonShape.
+     *  @li textShape.
      *
      *  add groups.
      *
