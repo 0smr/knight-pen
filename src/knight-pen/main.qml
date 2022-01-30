@@ -59,8 +59,7 @@ TileMaskWindow {
 
     SystemTrayIcon {
         visible: true
-        iconName: 'test'
-        iconSource: "Resources/Icons/icon-light.svg"
+        icon.source: "Resources/Icons/icon-light.svg"
         onActivated: {
             if(reason === SystemTrayIcon.Trigger){
                 window.visible = true

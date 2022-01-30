@@ -30,8 +30,7 @@ public:
           mTileSize(QSize(width() / mRows, height() / mColumns)),
           mTransposed(TransposeType::None),
           mMaskMatrix(booleanMatrix(1, std::vector<bool>(1, false))) {
-        setFlag(Qt::FramelessWindowHint, true);
-        setFlag(Qt::WindowStaysOnTopHint, true);
+        setFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Widget);
         setColor(Qt::transparent);
     }
 
