@@ -1,5 +1,5 @@
 # Knight Pen
-<img src="https://img.shields.io/badge/version-0.1.0-37c248"><br>
+<img src="https://img.shields.io/badge/version-0.1.1-37c248"><br>
 
 A simple screen annotation software.
 
