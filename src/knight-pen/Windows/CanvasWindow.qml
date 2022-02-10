@@ -9,30 +9,37 @@ ApplicationWindow {
 
     property alias knightcanvas : interactiveCanvas.knightcanvas;
 
-    property bool acceptInputs : true;
+    property bool acceptInputs : false;
     property bool hidden : visibility == Window.Hidden;
 
     function toggleVisiblity() {
         if(hidden == true) {
+            flags = Qt.Window;
             showFullScreen();
             flags = Qt.Widget;
         }
         else {
             hide();
         }
-        acceptInputs = flags & Qt.WindowTransparentForInput
+         // flag is non-NOTIFYable property, so can't be used to bind with acceptInputs.
+        acceptInputs = flags & Qt.WindowTransparentForInput;
     }
 
     function toggleAcceptInput() {
         flags ^= Qt.WindowTransparentForInput;
         flags ^= Qt.WindowStaysOnTopHint;
-        acceptInputs = flags & Qt.WindowTransparentForInput
+        acceptInputs = flags & Qt.WindowTransparentForInput;
     }
 
     color: 'transparent'
+    Component.onCompleted: {
+        showFullScreen();
+        flags = Qt.Widget;
+    }
 
     InteractiveCanvas {
         id: interactiveCanvas
         anchors.fill: parent
+        knightcanvas.enabled: !acceptInputs
     }
 }

@@ -20,6 +20,6 @@ void knightCanvas::setSelectedTool(const Tools &newSelectedTool) {
         return;
     mSelectedTool = newSelectedTool;
     emit selectedToolChanged();
-    update();
+    updateCanvas();
 }
 }

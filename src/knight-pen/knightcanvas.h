@@ -202,7 +202,6 @@ public:
     Q_INVOKABLE bool selectAnchorsAtArea(const QPointF &area, float radius) { Q_UNUSED(area) Q_UNUSED(radius) return false; }
     Q_INVOKABLE bool selectShapesAtArea(const QPointF &area, float radius) { Q_UNUSED(area) Q_UNUSED(radius) return false; }
 
-
     /**
      * @brief getter functions.
      */
@@ -222,46 +221,48 @@ public:
      */
     void setSelectedTool(const Tools &newSelectedTool);
     void setStrokeWidth(float newWidth) {
-        if(mPen.mWidth == newWidth || newWidth < 0) return;
+        newWidth = std::max(0.0f, newWidth);
+        if(mPen.mWidth == newWidth)
+            return;
         mPen.mWidth = newWidth;
         emit strokeWidthChanged();
         emit penChanged();
-        update();
+        updateCanvas();
     }
     void setStrokeColor(const QColor &newColor) {
         if(mPen.mStrokeColor == newColor) return;
         mPen.mStrokeColor = newColor;
         emit strokeColorChanged();
         emit penChanged();
-        update();
+        updateCanvas();
     }
     void setFillColor(const QColor &newColor) {
         if(mPen.mFillColor == newColor) return;
         mPen.mFillColor = newColor;
         emit fillColorChanged();
         emit penChanged();
-        update();
+        updateCanvas();
     }
     void setMiterLimit(float newMiterLimit) {
         if(mPen.mMiter == newMiterLimit || newMiterLimit < 0) return;
         mPen.mMiter = newMiterLimit;
         emit miterLimitChanged();
         emit penChanged();
-        update();
+        updateCanvas();
     }
     void setLineJoin(const Qt::PenJoinStyle &newLineJoin) {
         if(mPen == newLineJoin) return;
         mPen.setJoin(newLineJoin);
         emit lineJoinChanged();
         emit penChanged();
-        update();
+        updateCanvas();
     }
     void setLineCap(const Qt::PenCapStyle &newLineCap) {
         if(mPen == newLineCap) return;
         mPen.setCap(newLineCap);
         emit lineCapChanged();
         emit penChanged();
-        update();
+        updateCanvas();
     }
     void setMouse(const QPointF &newMouse) {
         const QPointF &rscale = newMouse / mScaleFactor;  // reverse scaled point
@@ -281,13 +282,24 @@ public:
         mScaleFactor = newScaleFactor;
         mSelectPen.mWidth = 0.7 * mScaleFactor; // change selection pen width on scale
         emit scaleFactorChanged();
-        update();
+        updateCanvas();
     }
 
 private:
     /**
      * private functions.
      */
+
+    /**
+     * @brief updateCanvas
+     * call update slot if item was enabled.
+     */
+    void updateCanvas() {
+        if(isEnabled() == true) {
+            update();
+        }
+    }
+
     void mouseMoves() {
         if(mCurrentShape.use_count() == 0)
             return;
@@ -313,7 +325,7 @@ private:
             default:
                 break;
         }
-        update();
+        updateCanvas();
     }
 
 public slots:
@@ -325,7 +337,7 @@ public slots:
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
         }
-        update();
+        updateCanvas();
     }
 
     void addLine(const QPointF &point) {
@@ -336,7 +348,7 @@ public slots:
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
         }
-        update();
+        updateCanvas();
     }
 
     void addEllipse(const QPointF &point) {
@@ -347,7 +359,7 @@ public slots:
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
         }
-        update();
+        updateCanvas();
     }
 
     void addPathPoint(const QPointF &point) {
@@ -361,7 +373,7 @@ public slots:
             auto path = std::dynamic_pointer_cast<pathShape>(mCurrentShape);
             path->pushPoint(point);
         }
-        update();
+        updateCanvas();
     }
 
     void setSelectedPen() {
@@ -378,14 +390,14 @@ public slots:
             shape->setSelected(false);
         }
         mSelectedShapes.clear();
-        update();
+        updateCanvas();
     }
 
     void clearCanvas() {
         mShapes.clear();
         mSelectedShapes.clear();
         mCurrentShape.reset();
-        update();
+        updateCanvas();
     }
 
     void stopDrawing() {
@@ -396,17 +408,16 @@ public slots:
                 mCurrentShape.reset();
             }
         }
-        update();
+        updateCanvas();
     }
 
     void cancelDrawing() {
-        if(mShapes.empty() == false && mSelectedShapes.empty() == false &&
-                                       mShapes.back()->selected()) {
+        if(mShapes.empty() == false && mSelectedShapes.empty() == false && mShapes.back()->selected()) {
             mShapes.pop_back();
             mSelectedShapes.pop_back();
         }
         mCurrentShape.reset();
-        update();
+        updateCanvas();
     }
 
 signals:
