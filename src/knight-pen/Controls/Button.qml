@@ -11,6 +11,7 @@ QQC.Button {
 
     property color color: '#555'
     property color bgColor: '#eee'
+    property alias tooltipText: tooltip.text
 
     width: 25
     height: width
@@ -37,18 +38,21 @@ QQC.Button {
     }
 
     background: Rectangle {
-        implicitWidth:  25
-        implicitHeight: 25
-
         color: control.palette.button
-        smooth: true
-
-        radius: width/5
-
         border {
             color: control.checked ? '#89c7f5' : Qt.darker(control.palette.button, 1.3)
             width: control.focus ? 2 : 1
             Behavior on width { NumberAnimation {duration: 100} }
         }
+    }
+
+    onPressed: tooltip.terminate();
+
+    WToolTip {
+        id: tooltip
+        delay: 1000
+        timeout: 2000
+        visible: control.hovered
+        anchors.right: parent.right
     }
 }

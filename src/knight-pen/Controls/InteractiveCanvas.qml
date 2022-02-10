@@ -25,14 +25,20 @@ Item {
         hoverEnabled: true
 
         onWheel: {
-            /**
-             * TODO: Math.floor() strokeWidth in non modifier.
-             */
             if(wheel.modifiers == Qt.AltModifier) {
-                knightcanvas.scaleFactor += wheel.angleDelta.x / 120 * 0.2; // 20 precent zooming
+                // zoom is disabled for now.
+                // knightcanvas.scaleFactor += wheel.angleDelta.x / 120 * 0.2; // 20 precent zooming
             } else {
-                const multi = wheel.modifiers == Qt.ControlModifier ? 0.1 : 1.0;
-                knightcanvas.strokeWidth += wheel.angleDelta.y / 120 * multi
+                const multi = (wheel.modifiers == Qt.ControlModifier ? 0.1 : 1.0);
+                knightcanvas.strokeWidth += wheel.angleDelta.y / 120 * multi;
+                /**
+                 * TODO: write a cleaner code.
+                 */
+                if(wheel.modifiers != Qt.ControlModifier) {
+                    knightcanvas.strokeWidth = wheel.angleDelta.y < 0 ?
+                                Math.ceil(knightcanvas.strokeWidth) :
+                                Math.floor(knightcanvas.strokeWidth);
+                }
             }
         }
 
