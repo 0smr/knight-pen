@@ -15,5 +15,7 @@
         <file>Resources/Cursor/Selection.svg</file>
         <file>Windows/CanvasWindow.qml</file>
         <file>Resources/Font/knight-icon.ttf</file>
+        <file>Controls/WToolTip.qml</file>
+        <file>Controls/Label.qml</file>
     </qresource>
 </RCC>

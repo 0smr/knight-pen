@@ -4,15 +4,30 @@
 A simple screen annotation software.
 
 <div align="center">
-    <img src="extera/logo/logo-name-knight-pen.webp" width="500px">
+    <img src="extera/logo/logo-name-knight-pen.webp" width="400px">
 </div>
 <br>
 
 <!-- # Preview -->
 
+## Compiling
+
+**Dependencies**
+Tested on `Qt >= 5.11`, `G++ >= 8.3` and `QMake >= 3.1`.
+
+**Clone repository**
+
+    git clone --recursive https://github.com/SMR76/knight-pen.git
+
+**‌Build**
+
+    cd knight-pen 
+    mkdir build
+    cd build 
+    qmake CONFIG+=release ../src/knight-pen/
+    make
+
 ## TO-DO
-- [x] Added custom <a href="./extera/icon-font">icon-font</a>.
-- [x] Fixed dragging issues.
 - [ ] Fix mask problem in custom <a href="./src/knight-pen/maskwindow.h">window</a>.
 - [ ] Add shape selection.
 - [ ] Add other pen & brush tools.
@@ -22,6 +37,7 @@ A simple screen annotation software.
 - [ ] Capability to translate selection.
 - [ ] Capability to intersect shapes.
 - [ ] Move InteractiveCanvas component to separate repository.
+- [ ] Port to cmake.
 
 ## Dependencies
 - [Qt](https://www.qt.io/) (LGPLV3) <sub>Core & GUI</sub>

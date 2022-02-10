@@ -48,6 +48,7 @@ Control {
 
                 checkable: true
                 checked: true
+                tooltipText: checked ? 'collapse' : 'expand'
                 onCheckedChanged: {
                     Window.window.setMaskArea(1, 10, 10, 10, checked);
                 }
@@ -79,6 +80,7 @@ Control {
                     id: oriention;
                     text: '\ue030';
                     checkable: true
+                    tooltipText: 'switch to ' + (checked ? 'vertical' : 'horizontal')
                 }
 
                 Grid {
@@ -89,7 +91,10 @@ Control {
                         id: drawTools;
                         text: '\ue027';
                         checkable: true
-                        onCheckedChanged: Window.window.setMaskRow(2, checked)
+                        tooltipText: checked ? 'draw tools -' : 'draw tools +'
+                        onCheckedChanged: {
+                            Window.window.setMaskRow(2, checked);
+                        }
                     }
 
                     Grid {
@@ -98,19 +103,41 @@ Control {
                         visible: drawTools.checked
                         itemPerRow: 1
 
-                        Button { text: '\ue000'; onClicked: canvas.selectedTool = KnightCanvas.Rectangle } // rectangle
+                        Button { // rectangle
+                            text: '\ue000';
+                            tooltipText: 'rectangle shape'
+                            onClicked: canvas.selectedTool = KnightCanvas.Rectangle
+                        }
                         // Button { text: '\uf312'; onClicked: canvas.selectedTool = KnightCanvas.Polygon } // Polygon
-                        Button { text: '\ue003'; onClicked: canvas.selectedTool = KnightCanvas.Ellipse } // ellipse
-                        Button { text: '\ue005'; onClicked: canvas.selectedTool = KnightCanvas.Line } // line
+                        Button { // ellipse
+                            text: '\ue003';
+                            tooltipText: 'ellipse shape'
+                            onClicked: canvas.selectedTool = KnightCanvas.Ellipse
+                        }
+                        Button { // line
+                            text: '\ue005';
+                            tooltipText: 'line shape'
+                            onClicked: canvas.selectedTool = KnightCanvas.Line
+                        }
                         // Button { text: '\uf30b'; onClicked: canvas.selectedTool = KnightCanvas.Arrow } // arrow
-                        Button { text: '\ue026'; onClicked: canvas.selectedTool = KnightCanvas.Path } // path
+                        Button { // path
+                            text: '\ue026';
+                            tooltipText: 'path tool'
+                            onClicked: canvas.selectedTool = KnightCanvas.Path
+                        }
 
                         // Button { text: '\uf305'; } // selection
                         // Button { text: '\uf040'; } // marker
                         // Button { text: '\uf591'; } // pencil
                         // Button { text: '\uf245'; } // pen
 
-                        Button { id: eraser; text: '\ue028'; }
+                        Button {
+                            id: eraser;
+                            tooltipText: 'eraser'
+                            text: '\ue028';
+                        }
+
+                        Label { text: canvas.strokeWidth.toFixed(1); }
                     }
                 }
 
@@ -122,7 +149,10 @@ Control {
                         id: colorValue;
                         checkable: true;
                         text: '\ue004'
-                        onCheckedChanged: Window.window.setMaskRow(3, checked)
+                        tooltipText: 'selected color'
+                        onCheckedChanged: {
+                            Window.window.setMaskRow(3, checked);
+                        }
                     }
 
                     Grid {
@@ -152,6 +182,7 @@ Control {
                             id: colorpickerButton;
                             text: '\ue020';
                             checkable: true
+                            tooltipText: 'screen color picker'
                             onClicked: {
                                 if(checked) {
                                     colorPickerWindow.activate();
@@ -170,19 +201,24 @@ Control {
 
                 Button {
                     id: trash; text: '\ue073';
+                    tooltipText: 'clear all canvas'
                     onClicked: canvas.clearCanvas();
                 }
 
                 Button {
                     id: lockInputs;
                     text: canvasWindow.acceptInputs ? '\ue074' : '\ue029';
+                    tooltipText: 'switch to ' + (canvasWindow.acceptInputs ? 'mouse mode' : 'canvas mode');
                     onClicked: canvasWindow.toggleAcceptInput();
                 }
 
                 Button {
                     id: visibleCanvas;
                     text: canvasWindow.hidden ? '\ue061' : '\ue060';
-                    onClicked: canvasWindow.toggleVisiblity();
+                    tooltipText: canvasWindow.hidden ? 'canvas is hidden' : ''
+                    onClicked: {
+                        canvasWindow.toggleVisiblity();
+                    }
                 }
 
                 Grid {
@@ -190,17 +226,20 @@ Control {
                     spacing: options.spacing
 
                     Button {
-                        id: operations;
+                        id: history;
                         text: '\ue054';
                         checkable: true
                         enabled: false
-                        onCheckedChanged: Window.window.setMaskRow(7, checked)
+                        tooltipText: 'history'
+                        onCheckedChanged: {
+                            Window.window.setMaskRow(7, checked);
+                        }
                     }
 
                     Grid {
                         flow: options.subflow
                         spacing: options.spacing
-                        visible: operations.checked
+                        visible: history.checked
                         itemPerRow: 1
 
                         Button { id: redo; text: '\ue056'; }
@@ -219,7 +258,10 @@ Control {
                         text: '\ue033';
                         checkable: true
                         enabled: false
-                        onCheckedChanged: Window.window.setMaskRow(8, checked)
+                        tooltipText: 'recent canvas'
+                        onCheckedChanged: {
+                            Window.window.setMaskRow(8, checked)
+                        }
                     }
 
                     Grid {
@@ -245,7 +287,7 @@ Control {
                         Button { text: '\ue048'; onPressed: artworks.index = (artworks.index + 1) % 8 }
                         Button { text: '\ue047'; onPressed: artworks.index = (artworks.index + 7) % 8 }
                         Button { text: '\ue050'; }
-                        Button { text: artworks.index+1; enabled: false }
+                        Label { text: artworks.index + 1; }
                     }
                 }
 

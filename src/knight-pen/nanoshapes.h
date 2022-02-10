@@ -122,7 +122,7 @@ public:
 
     shape() = default;
 
-    constexpr shape(const QRectF &rect,
+    shape(const QRectF &rect,
         const nanoPen &pen = nanoPen(),
         const bool &selected = false,
         float angle = 0.0f)
@@ -131,14 +131,14 @@ public:
           mSelected(selected),
           mAngle(angle){}
 
-    constexpr shape(const QPointF p1,
+    shape(const QPointF p1,
         const QPointF p2,
         const nanoPen &pen = nanoPen(),
         const bool &selected = false,
         float angle = 0.0f)
         : shape(QRectF(p1, p2), pen, selected, angle) {}
 
-    constexpr shape(const nanoPen &pen,
+    shape(const nanoPen &pen,
         const bool &selected = false,
         float angle = 0.0f)
         : shape(QRectF(), pen, selected, angle) {}
@@ -161,8 +161,10 @@ public:
 
     std::array<QPointF, 8> boundingPoints() {
         const QRectF &bp = mBoundingBox;
-        std::array<QPointF, 8> boundPoints(
-            {bp.topLeft(), bp.topRight(), bp.bottomRight(), bp.bottomLeft()});
+        std::array<QPointF, 8> boundPoints {
+            bp.topLeft(), bp.topRight(),
+            bp.bottomRight(), bp.bottomLeft()
+        };
         QTransform t = transformer();
         for(auto &point : boundPoints){
             point  = t.map(point);

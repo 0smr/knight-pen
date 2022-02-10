@@ -144,9 +144,9 @@ public slots:
 
     /**
      * NOTE: transparent mouse & keyboard input on specific spots.
-     *  https://stackoverflow.com/questions/20401896/qt-global-mouse-listener
-     *  https://stllug.sluug.org/meeting_notes/1997/0619/xkey.html
-     *  https://stackoverflow.com/questions/8629474/how-to-globally-capture-every-mouse-click-in-x11
+     * https://stackoverflow.com/questions/20401896/qt-global-mouse-listener
+     * https://stllug.sluug.org/meeting_notes/1997/0619/xkey.html
+     * https://stackoverflow.com/questions/8629474/how-to-globally-capture-every-mouse-click-in-x11
      */
 signals:
     void rowsChanged();
