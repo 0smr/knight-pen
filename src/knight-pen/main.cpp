@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<knightPen::knightCanvas>("knight.pen.canvas", 1, 0, "KnightCanvas");
 
     app.setApplicationDisplayName(QStringLiteral("Knight Pen"));
-    app.setApplicationVersion(QStringLiteral("0.1.1"));
+    app.setApplicationVersion(QStringLiteral(APP_VERSION));
     app.setOrganizationDomain(QStringLiteral("https://smr76.github.io"));
 
     QQmlApplicationEngine engine;

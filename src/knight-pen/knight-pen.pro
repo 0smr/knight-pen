@@ -7,16 +7,39 @@ CONFIG += c++17
 
 include(Third party/qnanopainter/libqnanopainter/include.pri)
 
+APP_VERSION = ""
+MAIN_COMMIT_NUMBER = ""
+COMMIT_SHORT_HASH = ""
+
+# If target OS has git installed.
+system("git --version") {
+    APP_VERSION = $$system('git describe --tags --abbrev=0')
+    MAIN_COMMIT_NUMBER = $$system('git rev-list --count main')
+    COMMIT_SHORT_HASH = $$system('git rev-parse --short HEAD')
+} else {
+    warning('git not found, please set app version manually in \".pro\" file..')
+}
+
+DEFINES += APP_VERSION='\\"$$APP_VERSION\\"'
+DEFINES += MAIN_COMMIT_NUMBER='\\"$$MAIN_COMMIT_NUMBER\\"'
+DEFINES += COMMIT_SHORT_HASH='\\"$$COMMIT_SHORT_HASH\\"'
+
 SOURCES += \
-        knightcanvas.cpp \
-        main.cpp \
-        maskwindow.cpp \
-        nanopainter.cpp \
-        painthelper.cpp \
-        utils.cpp
+    knightcanvas.cpp \
+    main.cpp \
+    maskwindow.cpp \
+    nanopainter.cpp \
+    painthelper.cpp \
+    shapes/apoint.cpp \
+    shapes/ellipseshape.cpp \
+    shapes/lineshape.cpp \
+    shapes/pathshape.cpp \
+    shapes/rectshape.cpp \
+    shapes/shape.cpp \
+    updater.cpp \
+    utils.cpp
 
 RESOURCES += qml.qrc
-
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -34,6 +57,13 @@ HEADERS += \
     maskwindow.h \
     nanopainter.h \
     nanopen.h \
-    nanoshapes.h \
     painthelper.h \
+    shapes/apoint.h \
+    shapes/ellipseshape.h \
+    shapes/lineshape.h \
+    shapes/pathshape.h \
+    shapes/rectshape.h \
+    shapes/shape.h \
+    shapes/shapes.h \
+    updater.h \
     utils.h

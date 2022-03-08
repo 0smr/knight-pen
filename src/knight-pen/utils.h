@@ -2,6 +2,7 @@
 
 #include <QQuickItem>
 #include <QGuiApplication>
+
 #include <QFontDatabase>
 #include <QScreen>
 #include <QCursor>
@@ -54,7 +55,9 @@ public:
         QGuiApplication::setOverrideCursor(mCursorShapes.at(cursor));
     }
 
-signals:
+    Q_INVOKABLE QString applicationVersion() {
+        return QGuiApplication::applicationVersion();
+    }
 
 private:
     std::map<utils::CursorShapes, QCursor> mCursorShapes;

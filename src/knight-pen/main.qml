@@ -28,7 +28,7 @@ TileMaskWindow {
     transposed: mainform.flow == Grid.TopToBottom ?
                     TileMaskWindow.None : TileMaskWindow.SecondaryTranspose
     function setMaskRow(row, val) {
-        let to = [0, 0, 6, 4, 0, 0, 0, 2, 6, 0, 0];
+        let to = [0, 0, 7, 4, 0, 0, 0, 2, 6, 0, 0];
         window.setMaskArea(row, 10 - to[row], row, 9, val);
     }
     Component.onCompleted: { window.setMaskArea(0, 10, 10, 10); }

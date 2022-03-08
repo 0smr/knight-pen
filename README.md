@@ -13,7 +13,11 @@ A simple screen annotation software.
 ## Compiling
 
 **Dependencies**
-Tested on `Qt >= 5.11`, `G++ >= 8.3` and `QMake >= 3.1`.
+
+`Qt >= 5.15` - `GCC >= 8.0` - `qmake >= 3.1`.
+
+    sudo apt-get install g++ build-essential qt5-default qttools5-dev qttools5-dev-tools qtdeclarative5-dev*
+
 
 **Clone repository**
 
@@ -29,7 +33,6 @@ Tested on `Qt >= 5.11`, `G++ >= 8.3` and `QMake >= 3.1`.
 
 ## TO-DO
 - [ ] Fix mask problem in custom <a href="./src/knight-pen/maskwindow.h">window</a>.
-- [ ] Add shape selection.
 - [ ] Add other pen & brush tools.
 - [ ] Capability to move selection.
 - [ ] Capability to rotate selection.
