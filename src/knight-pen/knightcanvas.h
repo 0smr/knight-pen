@@ -19,7 +19,7 @@
 
 #include "nanopainter.h"
 #include "nanopen.h"
-#include "nanoshapes.h"
+#include "shapes/shapes.h"
 #include "painthelper.h"
 
 namespace knightPen {
@@ -63,17 +63,20 @@ public:
      */
     enum Tools {
         None = 0x0,
-        Line,
-        Arrow,
-        Ellipse,
-        Rectangle,
-        Path,
-        Polygon,
+        Line = 0x1,
+        Arrow = 0x2,
+        Ellipse = 0x4,
+        Rectangle = 0x8,
+        Path = 0x10,
+        Polygon = 0x20,
+        Pencil = 0x40,
+        DrawTools = 0x7F,
         Selection,
         DirectSelection,
         GroupSelectionToggle,
         GroupSelectionInclude,
         GroupSelectionExclude,
+        SelectionTools = 0x0
     };
     Q_ENUMS(Tools)
 
@@ -164,11 +167,9 @@ public:
          */
     }
 
-    Q_INVOKABLE void eraseSelected() {
-        for(const auto &selectedShape: mSelectedShapes) {
-            std::remove(mShapes.begin(), mShapes.end(), selectedShape);
-        }
-    }
+    ///
+    ///  TODO: complete following functions.
+    ///
 
     Q_INVOKABLE bool joinSelected() {
         return mSelectedTool == Tools::Selection ? joinSelectedPahtes() : joinSelectedAnchors();
@@ -192,7 +193,16 @@ public:
         return mSelectedTool == Tools::Selection ? selectShapesAt(point) : selectAnchorsAt(point);
     }
     Q_INVOKABLE bool selectAnchorsAt(const QPointF &point) { Q_UNUSED(point) return false; }
-    Q_INVOKABLE bool selectShapesAt(const QPointF &point) { Q_UNUSED(point) return false; }
+    Q_INVOKABLE bool selectShapesAt(const QPointF &point) {
+        clearSelection();
+        for(auto shapeIter = mShapes.rbegin(); shapeIter != mShapes.rend(); ++shapeIter) {
+            if((*shapeIter)->contains(point) != PointState::None) {
+                mSelectedShapes.push_back(*shapeIter);
+                return true;
+            }
+        }
+        return false;
+    }
 
     Q_INVOKABLE bool selectAtArea(const QRectF &area) { Q_UNUSED(area) return false; }
     Q_INVOKABLE bool selectAnchorsAtArea(const QRectF &area) { Q_UNUSED(area) return false; }
@@ -227,42 +237,42 @@ public:
         mPen.mWidth = newWidth;
         emit strokeWidthChanged();
         emit penChanged();
-        updateCanvas();
+        update();
     }
     void setStrokeColor(const QColor &newColor) {
         if(mPen.mStrokeColor == newColor) return;
         mPen.mStrokeColor = newColor;
         emit strokeColorChanged();
         emit penChanged();
-        updateCanvas();
+        update();
     }
     void setFillColor(const QColor &newColor) {
         if(mPen.mFillColor == newColor) return;
         mPen.mFillColor = newColor;
         emit fillColorChanged();
         emit penChanged();
-        updateCanvas();
+        update();
     }
     void setMiterLimit(float newMiterLimit) {
         if(mPen.mMiter == newMiterLimit || newMiterLimit < 0) return;
         mPen.mMiter = newMiterLimit;
         emit miterLimitChanged();
         emit penChanged();
-        updateCanvas();
+        update();
     }
     void setLineJoin(const Qt::PenJoinStyle &newLineJoin) {
         if(mPen == newLineJoin) return;
         mPen.setJoin(newLineJoin);
         emit lineJoinChanged();
         emit penChanged();
-        updateCanvas();
+        update();
     }
     void setLineCap(const Qt::PenCapStyle &newLineCap) {
         if(mPen == newLineCap) return;
         mPen.setCap(newLineCap);
         emit lineCapChanged();
         emit penChanged();
-        updateCanvas();
+        update();
     }
     void setMouse(const QPointF &newMouse) {
         const QPointF &rscale = newMouse / mScaleFactor;  // reverse scaled point
@@ -282,23 +292,13 @@ public:
         mScaleFactor = newScaleFactor;
         mSelectPen.mWidth = 0.7 * mScaleFactor; // change selection pen width on scale
         emit scaleFactorChanged();
-        updateCanvas();
+        update();
     }
 
 private:
     /**
      * private functions.
      */
-
-    /**
-     * @brief updateCanvas
-     * call update slot if item was enabled.
-     */
-    void updateCanvas() {
-        if(isEnabled() == true) {
-            update();
-        }
-    }
 
     void mouseMoves() {
         if(mCurrentShape.use_count() == 0)
@@ -325,10 +325,16 @@ private:
             default:
                 break;
         }
-        updateCanvas();
+        update();
     }
 
 public slots:
+    void update() {
+        if(isEnabled() == true) {
+            QQuickItem::update();
+        }
+    }
+
     void addRect(const QPointF &point) {
         if(mCurrentShape == nullptr) {
             mCurrentShape = std::make_shared<rectShape>(point, mMouse);
@@ -337,7 +343,7 @@ public slots:
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
         }
-        updateCanvas();
+        update();
     }
 
     void addLine(const QPointF &point) {
@@ -348,7 +354,7 @@ public slots:
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
         }
-        updateCanvas();
+        update();
     }
 
     void addEllipse(const QPointF &point) {
@@ -359,7 +365,7 @@ public slots:
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
         }
-        updateCanvas();
+        update();
     }
 
     void addPathPoint(const QPointF &point) {
@@ -373,7 +379,7 @@ public slots:
             auto path = std::dynamic_pointer_cast<pathShape>(mCurrentShape);
             path->pushPoint(point);
         }
-        updateCanvas();
+        update();
     }
 
     void setSelectedPen() {
@@ -385,19 +391,28 @@ public slots:
         }
     }
 
+    void eraseSelection() {
+        for(const auto &selectedShape: mSelectedShapes) {
+            auto end = std::remove(mShapes.begin(), mShapes.end(), selectedShape);
+            mShapes.resize(std::distance(mShapes.begin(), end));
+        }
+        mSelectedShapes.clear();
+        update();
+    }
+
     void clearSelection() {
         for(auto &shape : mSelectedShapes) {
             shape->setSelected(false);
         }
         mSelectedShapes.clear();
-        updateCanvas();
+        update();
     }
 
     void clearCanvas() {
         mShapes.clear();
         mSelectedShapes.clear();
         mCurrentShape.reset();
-        updateCanvas();
+        update();
     }
 
     void stopDrawing() {
@@ -408,7 +423,7 @@ public slots:
                 mCurrentShape.reset();
             }
         }
-        updateCanvas();
+        update();
     }
 
     void cancelDrawing() {
@@ -417,7 +432,7 @@ public slots:
             mSelectedShapes.pop_back();
         }
         mCurrentShape.reset();
-        updateCanvas();
+        update();
     }
 
 signals:
@@ -431,15 +446,11 @@ signals:
     void penChanged();
     void mouseChanged();
     void scaleFactorChanged();
+    void shapeSelected();
 
 private:
     /**
      * TODO: classified snap points.
-     *  std::vector<QPointF> mSnapPointCentersX;
-     *  std::vector<QPointF> mSnapPointIntersectsX;
-     *  std::vector<QPointF> mSnapPointSortedX;
-     *  std::vector<QPointF> mSnapPointSortedY;
-     *
      *  nanoPen mSnapGuidePen;
      *
      *  TODO: other type of shapes.
@@ -449,8 +460,6 @@ private:
      *
      *  add groups.
      *
-     *  polygonShape mTempTriangle;
-     *
      *  mAboutToClosePath -> bool
      *  mAboutToJoin -> bool
      *  mNearCorners -> pair<shape, APoint>
@@ -459,7 +468,8 @@ private:
     std::vector<std::shared_ptr<shape>> mShapes;
     std::vector<std::shared_ptr<shape>> mSelectedShapes;
     std::shared_ptr<shape> mCurrentShape;
-    lineShape mPathGuide;
+
+    std::vector<QRectF> mArtwork;
 
     QPointF mMouse;
     nanoPen mPen;
@@ -467,7 +477,7 @@ private:
 
     Tools mSelectedTool;
 
+    bool mHover;
     float mScaleFactor;
-    std::vector<QRectF> mArtwork;
 };
 }

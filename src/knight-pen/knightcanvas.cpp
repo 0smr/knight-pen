@@ -3,6 +3,7 @@
 namespace knightPen {
 knightCanvas::knightCanvas(QQuickItem *parent) : QNanoQuickItem(parent) {
     mSelectPen.mStrokeColor = QColor(79, 127, 255, 255);
+    mSelectPen.mFillColor = QColor(79, 127, 255, 255);
     mSelectPen.mWidth = 0.6;
     mScaleFactor = 1.0f;
 
@@ -20,6 +21,6 @@ void knightCanvas::setSelectedTool(const Tools &newSelectedTool) {
         return;
     mSelectedTool = newSelectedTool;
     emit selectedToolChanged();
-    updateCanvas();
+    update();
 }
 }
