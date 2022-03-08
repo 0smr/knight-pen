@@ -23,6 +23,7 @@ Item {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         hoverEnabled: true
+        enabled: control.enabled
 
         onWheel: {
             if(wheel.modifiers == Qt.AltModifier) {
@@ -47,11 +48,10 @@ Item {
         }
 
         onPressed: {
+            let point = Qt.point(mouseX, mouseY);
 
-            if(mouse.button == Qt.RightButton) {
-                if(knightcanvas.selectedTool === KnightCanvas.Path){
-                    knightcanvas.stopDrawing();
-                }
+            if(mouse.button == Qt.RightButton && knightcanvas.selectedTool === KnightCanvas.Path) {
+                knightcanvas.stopDrawing();
             } else {
                 if(knightcanvas.drawing === false){
                     knightcanvas.clearSelection();
@@ -59,20 +59,26 @@ Item {
 
                 switch(knightcanvas.selectedTool) {
                 case KnightCanvas.Path:
-                    knightcanvas.addPathPoint(Qt.point(mouseX, mouseY));
+                    knightcanvas.addPathPoint(point);
                     break;
                 case KnightCanvas.Rectangle:
-                    knightcanvas.addRect(Qt.point(mouseX, mouseY));
+                    knightcanvas.addRect(point);
                     break;
                 case KnightCanvas.Line:
-                    knightcanvas.addLine(Qt.point(mouseX, mouseY));
+                    knightcanvas.addLine(point);
                     break;
                 case KnightCanvas.Ellipse:
-                    knightcanvas.addEllipse(Qt.point(mouseX, mouseY));
+                    knightcanvas.addEllipse(point);
+                    break;
+                case KnightCanvas.Selection:
+                    knightcanvas.clearSelection();
+                    knightcanvas.selectAt(point);
                     break;
                 }
             }
-            knightcanvas.mouse = Qt.point(mouseX, mouseY);
+
+            knightcanvas.mouse = point;
+            control.forceActiveFocus();
         }
 
         onReleased: {
@@ -80,5 +86,14 @@ Item {
                 knightcanvas.stopDrawing();
             }
         }
+    }
+
+    Keys.onDeletePressed: {
+        // erase selected shapes.
+        knightcanvas.eraseSelection();
+    }
+
+    Keys.onPressed: {
+        switch(event.key) {}
     }
 }

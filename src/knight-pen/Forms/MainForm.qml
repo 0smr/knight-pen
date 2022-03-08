@@ -126,17 +126,19 @@ Control {
                             onClicked: canvas.selectedTool = KnightCanvas.Path
                         }
 
-                        // Button { text: '\uf305'; } // selection
-                        // Button { text: '\uf040'; } // marker
-                        // Button { text: '\uf591'; } // pencil
-                        // Button { text: '\uf245'; } // pen
-
-                        Button {
-                            id: eraser;
-                            tooltipText: 'eraser'
-                            text: '\ue028';
+                        Button { // selection
+                            text: '\ue064';
+                            tooltipText: 'select tool'
+                            onClicked: canvas.selectedTool = KnightCanvas.Selection
                         }
-
+                        // Button { text: '\ue024'; } // marker
+                        // Button { text: '\ue022'; } // pencil
+                        Button { // pen
+                            text: '\ue023';
+                            tooltipText: 'pen';
+                            // onClicked: canvas.selectedTool = KnightCanvas.
+                        }
+                        // Button { id: eraser; tooltipText: 'eraser'; text: '\ue028'; }
                         Label { text: canvas.strokeWidth.toFixed(1); }
                     }
                 }
