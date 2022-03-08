@@ -133,9 +133,9 @@ public slots:
         for(int i = 0; i < mRows; ++i) {
             for(int j = 0 ; j < mColumns; ++j) {
                 if(secondaryDiagonal == true && i + j < std::min(mRows, mColumns)) {
-                    std::swap(matrix[mColumns - j - 1][mRows - i - 1], matrix[i][j]);
+                    std::vector<bool>::swap(matrix[mColumns - j - 1][mRows - i - 1], matrix[i][j]);
                 } else if(secondaryDiagonal == false && j < i) {
-                    std::swap(matrix[j][i], matrix[i][j]);
+                    std::vector<bool>::swap(matrix[j][i], matrix[i][j]);
                 }
             }
         }
