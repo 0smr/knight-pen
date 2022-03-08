@@ -11,7 +11,8 @@
 #include <memory>
 
 #include "nanopen.h"
-#include "nanoshapes.h"
+#include "shapes/shapes.h"
+
 namespace knightPen {
 
 class paintHelper
@@ -165,8 +166,15 @@ public:
             ps[i] = transorm.map(ps[i]);
         }
 
-        drawRect(painter, rect, pen);
-        drawAnchors(painter, ps, pen);
+        drawRect(painter, rect, pen); ///> draw bounding box rect.
+        drawAnchors(painter, ps, pen); ///> draw anchors around bounding box.
+        /// draw a point in center of bounding box if shape was big enough..
+        if(rect.normalized().width() > 10 && rect.normalized().height() > 10) {
+            pen.setToPainter(painter);
+            painter->beginPath();
+            painter->circle(rect.center(), 1);
+            painter->fill();
+        }
     }
 
     /**
