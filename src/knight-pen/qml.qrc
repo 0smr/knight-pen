@@ -3,7 +3,6 @@
         <file>main.qml</file>
         <file>Controls/Button.qml</file>
         <file>Forms/MainForm.qml</file>
-        <file>Forms/SettingForm.qml</file>
         <file>Forms/BaseForm.qml</file>
         <file>Controls/Hamburger.qml</file>
         <file>Controls/Grid.qml</file>
@@ -17,5 +16,16 @@
         <file>Resources/Font/knight-icon.ttf</file>
         <file>Controls/WToolTip.qml</file>
         <file>Controls/Label.qml</file>
+        <file>Windows/ConfigurationWindow.qml</file>
+        <file>Windows/HelpWindow.qml</file>
+        <file>Windows/BaseWindow.qml</file>
+        <file>Controls/RichText.qml</file>
+        <file>Forms/AboutForm.qml</file>
+        <file>Forms/ChangeLogForm.qml</file>
+        <file>Forms/ConfigurationForm.qml</file>
+        <file>Forms/UpdaterForm.qml</file>
+        <file>Forms/FAQForm.qml</file>
+        <file>Forms/HelpForm.qml</file>
+        <file>Controls/BoxShadow.qml</file>
     </qresource>
 </RCC>
