@@ -50,8 +50,8 @@ QQC.Button {
 
     WToolTip {
         id: tooltip
-        delay: 1000
-        timeout: 2000
+        delay: 500
+        timeout: 2500
         visible: control.hovered
         anchors.right: parent.right
     }
