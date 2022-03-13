@@ -40,7 +40,6 @@ Control {
         Grid {
             id: mainLayout
 
-            spacing: 2
             flow: oriention.checked ? Grid.LeftToRight : Grid.TopToBottom
 
             Button {
@@ -69,7 +68,6 @@ Control {
                 height: visible ? childrenRect.height : 0
 
                 visible: collapsebutton.checked
-                spacing: 2
 
                 // subgrid flows.
                 property int subflow: flow == Grid.TopToBottom ?  Grid.LeftToRight : Grid.TopToBottom
@@ -85,7 +83,6 @@ Control {
 
                 Grid {
                     flow: options.subflow
-                    spacing: options.spacing
 
                     Button {
                         id: drawTools;
@@ -99,9 +96,8 @@ Control {
 
                     Grid {
                         flow: options.subflow
-                        spacing: options.spacing
                         visible: drawTools.checked
-                        itemPerRow: 1
+                        preferredRows: 1
 
                         Button { // rectangle
                             text: '\ue000';
@@ -145,7 +141,6 @@ Control {
 
                 Grid {
                     flow: options.subflow
-                    spacing: options.spacing
 
                     Button {
                         id: colorValue;
@@ -160,14 +155,12 @@ Control {
                     Grid {
                         flow: parent.flow
                         visible: colorValue.checked
-                        spacing: parent.spacing
-                        itemPerRow: 1
+                        preferredRows: 1
 
                         Grid {
                             flow: parent.flow
-                            spacing: 1
-                            itemPerRow: 2
-
+                            preferredRows: 2
+                            spacing: parent.spacing/2
                             Button { width: 12; bgColor: 'black'; onClicked: colorValue.color = bgColor; }
                             Button { width: 12; bgColor: 'white'; onClicked: colorValue.color = bgColor; }
                             Button { width: 12; bgColor: '#00ADB5'; onClicked: colorValue.color = bgColor; }
@@ -225,7 +218,6 @@ Control {
 
                 Grid {
                     flow: options.subflow
-                    spacing: options.spacing
 
                     Button {
                         id: history;
@@ -240,9 +232,8 @@ Control {
 
                     Grid {
                         flow: options.subflow
-                        spacing: options.spacing
                         visible: history.checked
-                        itemPerRow: 1
+                        preferredRows: 1
 
                         Button { id: redo; text: '\ue056'; }
                         Button { id: undo; text: '\ue055'; }
@@ -252,7 +243,6 @@ Control {
 
                 Grid {
                     flow: options.subflow
-                    spacing: options.spacing
 
                     Button {
                         id: artworks;
@@ -268,14 +258,13 @@ Control {
 
                     Grid {
                         flow: options.subflow
-                        spacing: options.spacing
                         visible: artworks.checked
                         layoutDirection: Qt.RightToLeft
 
                         Grid {
                             flow: options.subflow
-                            spacing: 1
-                            itemPerRow: 2
+                            preferredRows: 2
+                            spacing: parent.spacing/2
                             Button { width: 12; text: '0'; onClicked: artworks.index = text }
                             Button { width: 12; text: '1'; onClicked: artworks.index = text }
                             Button { width: 12; text: '2'; onClicked: artworks.index = text }
