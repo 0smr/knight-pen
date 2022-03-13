@@ -5,7 +5,7 @@ import QtQuick.Controls 2.15
 import '../Controls'
 
 ApplicationWindow {
-    id: control
+    id: window
 
     property alias knightcanvas : interactiveCanvas.knightcanvas;
 
