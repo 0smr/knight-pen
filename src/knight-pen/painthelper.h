@@ -71,6 +71,10 @@ public:
             painter->lineTo((*path)[i]);
         }
 
+        if(path->closed()) {
+            painter->lineTo(path->at(0));
+        }
+
         if(pen.mFill == true) painter->fill();
         if(pen.mStroke == true) painter->stroke();
     }

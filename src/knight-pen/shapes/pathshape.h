@@ -48,6 +48,9 @@ public:
     APointF &operator[](size_t index) { return mPointSeries.at(index); }
     const APointF &operator[](size_t index) const { return mPointSeries.at(index); }
 
+    APointF &at(size_t index) { return mPointSeries.at(index); }
+    const APointF &at(size_t index) const { return mPointSeries.at(index); }
+
     std::vector<APointF>::iterator begin() {
         return mPointSeries.begin();
     }
@@ -55,6 +58,7 @@ public:
     std::vector<APointF>::iterator end() {
         return mPointSeries.end();
     }
+
 
     const QRectF &updateBoundingBox() override {
         if(mPointSeries.empty() == true)
