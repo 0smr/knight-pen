@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 
 #include "utils.h"
+#include "updater.h"
 #include "knightcanvas.h"
 #include "maskwindow.h"
 
@@ -10,10 +11,6 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
     QGuiApplication app(argc, argv);
-
-    qmlRegisterType<utils>("knight.pen.utils", 1, 0, "Utils");
-    qmlRegisterType<tileMaskWindow>("knight.pen.window", 1, 0, "TileMaskWindow");
-    qmlRegisterType<knightPen::knightCanvas>("knight.pen.canvas", 1, 0, "KnightCanvas");
 
     app.setApplicationDisplayName(QStringLiteral("Knight Pen"));
     app.setApplicationVersion(QStringLiteral(APP_VERSION));

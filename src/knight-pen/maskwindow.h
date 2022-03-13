@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QQmlApplicationEngine>
 #include <QQuickPaintedItem>
 #include <QQuickWindow>
 #include <QQuickItem>
@@ -159,3 +160,8 @@ private:
     TransposeType mTransposed;
     booleanMatrix mMaskMatrix;
 };
+
+static void registerKPMaskWindowType() {
+    qmlRegisterType<tileMaskWindow>("knight.pen.window", 1, 0, "TileMaskWindow");
+}
+Q_COREAPP_STARTUP_FUNCTION(registerKPMaskWindowType)

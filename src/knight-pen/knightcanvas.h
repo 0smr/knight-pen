@@ -6,6 +6,7 @@
 
 #include <qnamespace.h>
 
+#include <QQmlApplicationEngine>
 #include <QLine>
 #include <QPen>
 #include <QPoint>
@@ -377,7 +378,15 @@ public slots:
             mSelectedShapes.push_back(mCurrentShape);
         } else if(mCurrentShape->type() == shape::Path) {
             auto path = std::dynamic_pointer_cast<pathShape>(mCurrentShape);
-            path->pushPoint(point);
+            /// pathes can be closed in two condition:
+            /// 1. path must contain more than 2 point.
+            /// 2. distance between tail and head must be lower than 3 pixel.
+            if(QLineF(point, path->at(0)).length() < 3 && path->size() >= 3) {
+                path->setClosed(true);
+                stopDrawing();
+            } else {
+                path->pushPoint(point);
+            }
         }
         update();
     }
@@ -481,3 +490,8 @@ private:
     float mScaleFactor;
 };
 }
+
+static void registerKnightCanvasType() {
+    qmlRegisterType<knightPen::knightCanvas>("knight.pen.canvas", 1, 0, "KnightCanvas");
+}
+Q_COREAPP_STARTUP_FUNCTION(registerKnightCanvasType)

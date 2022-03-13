@@ -64,3 +64,8 @@ private:
     QList<QScreen *> mScreens;
     QPixmap mScreenPixmap;
 };
+
+static void registerKPUtilsTYpe() {
+    qmlRegisterType<utils>("knight.pen.utils", 1, 0, "Utils");
+}
+Q_COREAPP_STARTUP_FUNCTION(registerKPUtilsTYpe)
