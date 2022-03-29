@@ -8,34 +8,19 @@ namespace knightPen {
  * @brief The nanoPen struct
  */
 struct nanoPen {
-    QNanoPainter::PathWinding mWinding : 2;
-    QNanoPainter::LineCap mCap : 2;
-    QNanoPainter::LineJoin mJoin : 3;
-    QNanoPainter::TextAlign mTextAlign : 3;
-    QNanoPainter::TextBaseline mTextBaseLine : 7;
-    QNanoPainter::PixelAlign mPixelAlign : 2;
-    QNanoPainter::CompositeOperation mComposite : 4;
-    QNanoPainter::BlendFactor mBlend : 11;
-
-    bool mFill = false;
-    bool mStroke = true;
-    float mWidth = 1.0f;
-    float mMiter = 10.0f;
-    QColor mFillColor = Qt::black;
-    QColor mStrokeColor = Qt::black;
+    nanoPen(): mFill(false), mStroke(true) {}
 
     void  setToPainter(QNanoPainter *painter) const {
         /**
          * TODO: add pattern as style.
          */
-        painter->setFillStyle(QNanoColor::fromQColor(mFillColor));
-        painter->setStrokeStyle(QNanoColor::fromQColor(mStrokeColor));
+        painter->setFillStyle(mFillColor);
+        painter->setStrokeStyle(mStrokeColor);
         painter->setMiterLimit(mMiter);
         painter->setLineWidth(mWidth);
         painter->setLineCap(mCap);
         painter->setLineJoin(mJoin);
     }
-
     void setJoin(const Qt::PenJoinStyle &join) { mJoin = fromQtJoin(join); }
     void setJoin(const QNanoPainter::LineJoin &joinStyle) { mJoin = joinStyle; }
     void setCap(const Qt::PenCapStyle &capStyle) { mCap = fromQtCap(capStyle); }
@@ -95,5 +80,22 @@ struct nanoPen {
             return Qt::PenJoinStyle::MiterJoin;
         }
     }
+
+    QNanoPainter::PathWinding mWinding : 2;
+    QNanoPainter::LineCap mCap : 2;
+    QNanoPainter::LineJoin mJoin : 3;
+    QNanoPainter::TextAlign mTextAlign : 3;
+    QNanoPainter::TextBaseline mTextBaseLine : 7;
+    QNanoPainter::PixelAlign mPixelAlign : 2;
+    QNanoPainter::CompositeOperation mComposite : 4;
+    QNanoPainter::BlendFactor mBlend : 11;
+
+    bool mFill: 1;
+    bool mStroke: 1;
+
+    float mWidth = 1.0f;
+    float mMiter = 10.0f;
+    QRgb mFillColor = 0xff000000; /// #AARRGGBB (Qt::black)
+    QRgb mStrokeColor = 0xff000000; /// #AARRGGBB (Qt::black)
 };
 }

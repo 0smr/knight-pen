@@ -2,9 +2,9 @@
 
 namespace knightPen {
 knightCanvas::knightCanvas(QQuickItem *parent) : QNanoQuickItem(parent) {
-    mSelectPen.mStrokeColor = QColor(79, 127, 255, 255);
-    mSelectPen.mFillColor = QColor(79, 127, 255, 255);
-    mSelectPen.mWidth = 0.6;
+    mSelectPen.mStrokeColor = 0xff4f7fff;
+    mSelectPen.mFillColor = 0xff4f7fff;
+    mSelectPen.mWidth = 0.6f;
     mScaleFactor = 1.0f;
 
     connect(this, &knightCanvas::penChanged, this, &knightCanvas::setSelectedPen);

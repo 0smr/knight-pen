@@ -115,7 +115,7 @@ public:
             QRectF rect(point - QPointF(1.5, 1.5) * reverseScale, QSizeF(3.0, 3.0) * reverseScale);
 
             /// If @a forceSelectedStyle is set stroke color.
-            pen.mFillColor = point.selected() || forceFill ? pen.mStrokeColor : QColor(255,255,255);
+            pen.mFillColor = point.selected() || forceFill ? pen.mStrokeColor : 0xffffffff;
             drawRect(painter, rect, pen);
         }
     }

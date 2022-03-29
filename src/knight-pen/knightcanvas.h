@@ -168,10 +168,7 @@ public:
          */
     }
 
-    ///
-    ///  TODO: complete following functions.
-    ///
-
+    /// TODO: complete following functions.
     Q_INVOKABLE bool joinSelected() {
         return mSelectedTool == Tools::Selection ? joinSelectedPahtes() : joinSelectedAnchors();
     }
@@ -190,18 +187,27 @@ public:
      * @li select at specific circle area.
      * @li select at specific rectangle area.
      */
-    Q_INVOKABLE bool selectAt(const QPointF &point) {
-        return mSelectedTool == Tools::Selection ? selectShapesAt(point) : selectAnchorsAt(point);
+    Q_INVOKABLE bool selectAt(const QPointF &point, bool discardSelected = false) {
+        return mSelectedTool == Tools::Selection ? selectShapesAt(point, discardSelected)
+                                                 : selectAnchorsAt(point, discardSelected);
     }
-    Q_INVOKABLE bool selectAnchorsAt(const QPointF &point) { Q_UNUSED(point) return false; }
-    Q_INVOKABLE bool selectShapesAt(const QPointF &point) {
-        clearSelection();
+    Q_INVOKABLE bool selectAnchorsAt(const QPointF &point, bool discardSelected) {
+        Q_UNUSED(point)
+        Q_UNUSED(discardSelected)
+        return false;
+    }
+    Q_INVOKABLE bool selectShapesAt(const QPointF &point, bool discardSelected) {
+        if(!discardSelected) clearSelection();
         for(auto shapeIter = mShapes.rbegin(); shapeIter != mShapes.rend(); ++shapeIter) {
             if((*shapeIter)->contains(point) != PointState::None) {
                 mSelectedShapes.push_back(*shapeIter);
+
+                emit selectedShapesChanged();
+                updatePen();
                 return true;
             }
         }
+
         return false;
     }
 
@@ -213,13 +219,11 @@ public:
     Q_INVOKABLE bool selectAnchorsAtArea(const QPointF &area, float radius) { Q_UNUSED(area) Q_UNUSED(radius) return false; }
     Q_INVOKABLE bool selectShapesAtArea(const QPointF &area, float radius) { Q_UNUSED(area) Q_UNUSED(radius) return false; }
 
-    /**
-     * @brief getter functions.
-     */
+    /// @brief getter functions.
     const Tools &selectedTool() const { return mSelectedTool; }
     const QPointF &mouse() const { return mMouse; }
-    const QColor &strokeColor() const { return mPen.mStrokeColor; }
-    const QColor &fillColor() const { return mPen.mFillColor; }
+    QColor strokeColor() const { return mPen.mStrokeColor; }
+    QColor fillColor() const { return mPen.mFillColor; }
     float strokeWidth() const { return mPen.mWidth; }
     float miterLimit() const { return mPen.mMiter; }
     Qt::PenCapStyle lineCap() const { return mPen; }
@@ -227,9 +231,7 @@ public:
     float scaleFactor() const { return mScaleFactor; }
     bool drawing() const { return mCurrentShape.use_count() > 0; }
 
-    /**
-     * @brief setter functions.
-     */
+    /// @brief setter functions.
     void setSelectedTool(const Tools &newSelectedTool);
     void setStrokeWidth(float newWidth) {
         newWidth = std::max(0.0f, newWidth);
@@ -241,15 +243,15 @@ public:
         update();
     }
     void setStrokeColor(const QColor &newColor) {
-        if(mPen.mStrokeColor == newColor) return;
-        mPen.mStrokeColor = newColor;
+        if(mPen.mStrokeColor == newColor.rgb()) return;
+        mPen.mStrokeColor = newColor.rgb();
         emit strokeColorChanged();
         emit penChanged();
         update();
     }
     void setFillColor(const QColor &newColor) {
-        if(mPen.mFillColor == newColor) return;
-        mPen.mFillColor = newColor;
+        if(mPen.mFillColor == newColor.rgb()) return;
+        mPen.mFillColor = newColor.rgb();
         emit fillColorChanged();
         emit penChanged();
         update();
@@ -285,7 +287,7 @@ public:
          * @brief mouseMoves
          * visualize current draw on mouse move.
          */
-        mouseMoves();
+        visualizeCurrentShape();
     }
     void setScaleFactor(float newScaleFactor) {
         if(qFuzzyCompare(mScaleFactor, newScaleFactor) || newScaleFactor < 0.2)
@@ -296,12 +298,26 @@ public:
         update();
     }
 
-private:
-    /**
-     * private functions.
-     */
+private slots:
+    /// private functions.
+    void updatePen() {
+        if(mSelectedShapes.empty() == false) {
+            nanoPen sPen = mSelectedShapes.front()->pen(),
+                    temp = mPen;
+            mPen = sPen;
 
-    void mouseMoves() {
+            if(temp.mStrokeColor != sPen.mStrokeColor ) emit strokeColorChanged();
+            if(temp.mFillColor != sPen.mFillColor) emit fillColorChanged();
+            if(temp.mWidth != sPen.mWidth) emit strokeWidthChanged();
+            if(temp.mMiter != sPen.mMiter) emit miterLimitChanged();
+            if(temp.mJoin != sPen.mJoin) emit lineJoinChanged();
+            if(temp.mCap != sPen.mCap) emit lineCapChanged();
+
+            emit penChanged();
+        }
+    }
+
+    void visualizeCurrentShape() {
         if(mCurrentShape.use_count() == 0)
             return;
 
@@ -343,6 +359,8 @@ public slots:
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
+
+            emit selectedShapesChanged();
         }
         update();
     }
@@ -354,6 +372,8 @@ public slots:
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
+
+            emit selectedShapesChanged();
         }
         update();
     }
@@ -365,6 +385,8 @@ public slots:
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
+
+            emit selectedShapesChanged();
         }
         update();
     }
@@ -376,6 +398,8 @@ public slots:
             mCurrentShape->setSelected(true);
             mShapes.push_back(mCurrentShape);
             mSelectedShapes.push_back(mCurrentShape);
+
+            emit selectedShapesChanged();
         } else if(mCurrentShape->type() == shape::Path) {
             auto path = std::dynamic_pointer_cast<pathShape>(mCurrentShape);
             /// pathes can be closed in two condition:
@@ -406,6 +430,8 @@ public slots:
             mShapes.resize(std::distance(mShapes.begin(), end));
         }
         mSelectedShapes.clear();
+
+        emit selectedShapesChanged();
         update();
     }
 
@@ -414,6 +440,8 @@ public slots:
             shape->setSelected(false);
         }
         mSelectedShapes.clear();
+
+        emit selectedShapesChanged();
         update();
     }
 
@@ -421,6 +449,8 @@ public slots:
         mShapes.clear();
         mSelectedShapes.clear();
         mCurrentShape.reset();
+
+        emit selectedShapesChanged();
         update();
     }
 
@@ -441,6 +471,8 @@ public slots:
             mSelectedShapes.pop_back();
         }
         mCurrentShape.reset();
+
+        emit selectedShapesChanged();
         update();
     }
 
@@ -455,6 +487,7 @@ signals:
     void penChanged();
     void mouseChanged();
     void scaleFactorChanged();
+    void selectedShapesChanged();
     void shapeSelected();
 
 private:
