@@ -2,44 +2,37 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import '../Forms'
+import '../forms'
+import '../controls'
 
 BaseWindow {
     id: window
 
-    Page {
-        implicitWidth: parent.width
-        anchors.fill: parent
-        clip: true
-        header: TabBar {
-            id: headBar
-            spacing: 0
-            contentHeight: 20
-            implicitWidth: availableWidth
-            currentIndex: 1
+    property bool updateAvaliable: false
+    property alias tabIndex: tabView
 
-            Repeater {
-                model: ["Configuration", "Updater"]
-                TabButton {
-                    text: modelData
-                    width: Math.max(implicitWidth, headBar.width / parent.count);
-                }
-            }
+    TabView {
+        id: tabView
+
+        clip: true
+        padding: 8
+        anchors.fill: parent
+
+        currentIndex: 1
+
+        tabs: [
+            { text:'Configuration', icon: '\ue058'},
+            { text:'Updater', icon: '\ue052'}
+        ]
+
+        ConfigurationForm {
+            width: parent.width
+            height: parent.height
         }
 
-        StackLayout {
-            anchors.fill: parent
-            currentIndex: headBar.currentIndex
-
-            ConfigurationForm {
-                width: parent.width
-                height: parent.height
-            }
-
-            UpdaterForm {
-                width: parent.width
-                height: parent.height
-            }
+        UpdaterForm {
+            width: parent.width
+            height: parent.height
         }
     }
 }
