@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <array>
 
 #include "apoint.h"
 
@@ -44,6 +45,8 @@ public:
         const bool &selected = false,
         float angle = 0.0f)
         : shape(QRectF(), pen, selected, angle) {}
+
+    ~shape() {};
 
     QTransform transformer() const {
         QPointF c = mBoundingBox.center();

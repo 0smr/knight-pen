@@ -59,7 +59,6 @@ public:
         return mPointSeries.end();
     }
 
-
     const QRectF &updateBoundingBox() override {
         if(mPointSeries.empty() == true)
             return mBoundingBox;

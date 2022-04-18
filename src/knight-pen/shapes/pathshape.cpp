@@ -35,6 +35,4 @@ PointState pathShape::contains(const QPointF &point) const {
         return PointState::None;
     }
 }
-
-
 }

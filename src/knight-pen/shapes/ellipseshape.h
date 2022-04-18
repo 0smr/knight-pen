@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "shape.h"
 #include "pathshape.h"
 
