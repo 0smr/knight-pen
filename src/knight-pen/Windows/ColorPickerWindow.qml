@@ -9,6 +9,7 @@ Window {
 
     color: 'transparent'
     visibility: Window.Hidden
+    flags: Qt.Widget
 
     signal colorSelected(color selectedColor, bool valid);
 
@@ -16,13 +17,7 @@ Window {
 
     function activate() {
         showFullScreen()
-        flags = Qt.Widget
     }
-    /**
-     * FIXME: Qt bug screen flashes black.
-     * FIXME: screen goes black if windows sets to WindowStayOnTopHint and Fullscreen visiblity.
-     * NOTE: color picker window sets under main application.
-     */
 
     function rgbString(c) {
         return "%1,%2,%3".arg(Math.round(c.r * 255))
@@ -42,10 +37,6 @@ Window {
                          .arg(Math.round(c.hsvValue * 255));
     }
 
-    Utils {
-        id: utils
-    }
-
     Item {
         id: indicator
         x: mousearea.mouseX
@@ -53,40 +44,47 @@ Window {
 
         ToolTip {
             x: 5;
+            y: -background.height - 10
             visible: control.visible && mousearea.containsMouse
-            background: Row {
-                spacing: 1
-                Rectangle {
-                    width: 10
-                    height: width;
-                    smooth: true
-                    color: control.pickedColor
-                    border.width: 1
-                    border.color: 'gray'
-                }
+            background: Rectangle {
+                color: '#44000000'
+                radius: 3
+                width: childrenRect.width + 8
+                height: childrenRect.height + 6
 
-                Rectangle {
+                Row {
+                    spacing: 2
+                    padding: 3
                     width: childrenRect.width
-                    height: childrenRect.height
-                    border {width: 1; color: 'gray'}
+                    height: colorText.height
+
+                    Rectangle {
+                        width: height
+                        height: parent.height;
+                        radius: 2
+                        color: control.pickedColor
+                    }
 
                     Column {
-                        padding: 3
+                        id: colorText
                         Text {
-                            color: 'gray'
-                            font.family: utils.systemFixedFont()
+                            color: '#fff'
+                            font.family: Utils.systemFixedFont()
+                            font.bold: true
                             text: "rgb:" + rgbString(control.pickedColor)
                         }
 
                         Text {
-                            color: 'gray'
-                            font.family: utils.systemFixedFont()
+                            color: '#fff'
+                            font.family: Utils.systemFixedFont()
+                            font.bold: true
                             text: "hsl:" + hslString(control.pickedColor)
                         }
 
                         Text {
-                            color: 'gray'
-                            font.family: utils.systemFixedFont()
+                            color: '#fff'
+                            font.family: Utils.systemFixedFont()
+                            font.bold: true
                             text: "hsv:" + hsvString(control.pickedColor)
                         }
                     }
@@ -105,7 +103,7 @@ Window {
 
         onPositionChanged: {
             /// get color under cursor and set to @a pickedColor
-            control.pickedColor = utils.pickColorAt(mouseX, mouseY);
+            control.pickedColor = Utils.pickColorAt(mouseX, mouseY);
         }
 
         onClicked: {
