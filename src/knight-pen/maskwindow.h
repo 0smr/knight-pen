@@ -23,6 +23,11 @@ public:
         QQuickWindow::resizeEvent(event);
     }
 
+    void exposeEvent(QExposeEvent *ev) override {
+        if(isExposed()) update();
+        QQuickWindow::exposeEvent(ev);
+    }
+
     const QSize &sector() const { return mSector; }
     void setSector(const QSize &newSectorSize) {
         if(mSector == newSectorSize)

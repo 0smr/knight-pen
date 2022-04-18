@@ -5,16 +5,16 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-include(Third party/qnanopainter/libqnanopainter/include.pri)
+include('Third party/qnanopainter/libqnanopainter/include.pri')
 
 APP_VERSION = ""
-MAIN_COMMIT_NUMBER = ""
+TOTAL_COMMIT_COUNT = ""
 COMMIT_SHORT_HASH = ""
 
 # If target OS has git installed.
 system("git --version") {
     APP_VERSION = $$system('git describe --tags --abbrev=0')
-    MAIN_COMMIT_NUMBER = $$system('git rev-list --count main')
+    TOTAL_COMMIT_COUNT = $$system('git rev-list --count main')
     COMMIT_SHORT_HASH = $$system('git rev-parse --short HEAD')
 } else {
     warning('git not found, please set app version manually in \".pro\" file..')
