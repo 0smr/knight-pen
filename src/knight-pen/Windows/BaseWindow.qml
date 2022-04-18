@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
 
-import '../Controls' as CC
+import '../controls'
 
 Window {
     id: window
@@ -48,7 +48,7 @@ Window {
         }
     }
 
-    CC.BoxShadow {
+    BoxShadow {
         anchors.fill: parent
         visible: !(window.visibility === Window.Maximized)
         spread: window.active ? 10 : 15
@@ -56,6 +56,11 @@ Window {
         radius: 5
 
         Behavior on spread { NumberAnimation { duration: 110 } }
+    }
+
+    FontLoader {
+        id: knightFont
+        source: '../resources/Font/knight-icon-solid.ttf'
     }
 
     Page {
@@ -73,10 +78,8 @@ Window {
             MouseArea {
                 anchors.fill: parent
                 onDoubleClicked: {
-                    if(window.visibility === Window.Maximized)
-                        window.showNormal();
-                    else
-                        window.showMaximized();
+                    window.visibility === Window.Maximized ?
+                                window.showNormal() : window.showMaximized();
                 }
             }
 
@@ -84,35 +87,42 @@ Window {
                 anchors.fill: parent
 
                 Text {
-                    id: title
-                    width: implicitWidth
+                    id: logo
                     height: parent.height
                     leftPadding: 3
                     color: '#ddd'
-                    text: '\ue006 Knight pen'
-                    font.family: 'knight ico'
+                    text: '\ue006'
+                    font.family: knightFont.name
+                    verticalAlignment: Qt.AlignVCenter
+                }
+
+                Text {
+                    id: title
+                    height: parent.height
+                    leftPadding: 3
+                    color: '#ddd'
+                    text: 'Knight Pen'
+                    font.family: 'Calibri'
                     verticalAlignment: Qt.AlignVCenter
                 }
 
                 Item {
-                    width: header.width - title.width - 20
+                    width: header.width - title.width - logo.width - 20
                     height: parent.height
                 }
 
-                Button {
-                    padding: 0
+                AbstractButton {
+                    id: closeBtn
                     width: 20
                     height: parent.height
-
-                    text: '\ue057'
-                    font.family: 'knight ico'
-
-                    hoverEnabled: true
-                    palette {
-                        button: hovered ? '#f44' : '#353637'
-                        buttonText: '#eee'
+                    text: 'x'
+                    contentItem: Text {
+                        width: 20; text: 'x'; color: "#eee"
+                        font.family: knightFont.name
+                        verticalAlignment: Qt.AlignVCenter
+                        horizontalAlignment: Qt.AlignHCenter
                     }
-
+                    background: Rectangle { color: closeBtn.hovered ? '#f44' : '#353637' }
                     onClicked: window.close();
                 }
             }
