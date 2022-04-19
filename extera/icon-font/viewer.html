@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<head>
+    <title>Glyph Viewer</title>
+    <style>
+        body {
+            font-family: calibri;
+            word-break: break-all;
+            color: #518eff;
+            font-size: small;
+            margin: 0;
+            padding: 0;
+        }
+        .grid div.row {
+            display: flex;
+            position: relative;
+            margin: 10px 0;
+        }
+        .grid div.col {
+            display: flex;
+            position: relative;
+            padding: 5px;
+            margin: 0px 2px;
+            width: 100%;
+        }
+        .grid .vguide,
+        .grid .hguide,
+        .grid div.row::before,
+        .grid div.row::after,
+        .grid div.col::before,
+        .grid div.col::after {
+            position: absolute;
+            background-color: #00000034;
+            content: "";
+        }
+        .grid .vguide,
+        .grid .hguide { background-color: #fb90ff7e; word-break: keep-all; }
+        .grid .hguide,
+        .grid div.row::before,
+        .grid div.row::after { left: -5px; top: 5px; width: calc(100% + 10px); height: 1px; }
+        .grid div.row::after { top: auto; bottom: 5px; }
+        .grid .vguide,
+        .grid div.col::before,
+        .grid div.col::after { top: -5px; width: 1px; height: calc(100% + 10px); }
+        .grid div.col::after { right: 5px; }
+        img { margin: 0; padding: 0; }
+        .blur { filter: blur(5px); }
+        #unicode-table { width: calc(100% - 50px); min-width: 720px; margin: 20px auto; }
+        #unicode-table .row .col i {
+            position: absolute;
+            visibility: hidden;
+            
+            left: 50%; top: 0;
+            width: max-content;
+            padding: 5px;
+            opacity: 0;
+            border-radius: 5px;
+            color: #eee;
+            background-color: #000000aa;
+            transform: translate(-50%, -80%);
+            transition-property: opacity,transform;
+            transition-duration: 0.5s;
+            cursor: pointer;
+        }
+        #unicode-table .row .col:hover i {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, -100%);
+        }
+
+        #cover {
+            left: 0; top: 0;
+            display: none;
+            position: fixed;
+            width: 100%; height: 100%;
+            background-color: #0000008a;
+        }
+
+        #modal {
+            left: calc(50% - 30vh); top: 20%;
+            width: 60vh;
+            display: none;
+            user-select: none;
+            position: fixed;
+            color: aliceblue;
+            background-color: #ffffff33;
+            cursor: crosshair;
+        }
+        #modal .row { margin: 0; }
+
+    </style>
+</head>
+<body>
+    <div id="unicode-table">
+        <h2> Knight Pen Glyph Viewr </h2>
+        <div class="grid">
+            %unicode-view%
+        </div>
+    </div>
+    <div id="cover"></div>
+    <div id="modal">
+        <div class="grid">
+            <div class="row">
+                <div class="col"><img src=""></div>
+                <div class="vguide">0px</div>
+                <div class="hguide">0px</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let cover = document.getElementById("cover");
+        let modal = document.getElementById("modal");
+        let unicodeTable = document.getElementById("unicode-table");
+        
+        let glyphs = document.querySelectorAll("#unicode-table img");
+        let tooltips = document.querySelectorAll("#unicode-table i");
+        
+        let vguide = document.querySelector("#modal .vguide");
+        let hguide = document.querySelector("#modal .hguide");
+
+        for(const glyph of glyphs) {
+            if(glyph.src != "") {
+                glyph.addEventListener('click', (e) => {
+                    let modalImg = document.querySelector("#modal img");
+                    let img = e.target;
+                    modalImg.src = img.src;
+                    cover.style.display = "block";
+                    modal.style.display = "block";
+                    unicodeTable.classList.add("blur");
+                });
+            }
+        }
+        
+        for(let tooltip of tooltips) {
+            tooltip.addEventListener('click', (e) => {
+                const tooltip = e.target;
+                const oldText = tooltip.innerText;
+                navigator.clipboard.writeText(tooltip.innerText.substr(0, 4));  // copy to clipboard
+                
+                tooltip.innerText = "copied";
+                setTimeout(() => tooltip.innerText = oldText, 1000);
+            });
+        }
+
+        cover.addEventListener('click', () => {
+            cover.style.display = "none";
+            modal.style.display = "none";
+            unicodeTable.classList.remove("blur");
+        });
+        modal.addEventListener('mousemove', (e) => {
+            let padding = 5;
+            let x = e.clientX - modal.offsetLeft;
+            let y = e.clientY - modal.offsetTop;
+            vguide.style.left = x + "px";
+            vguide.innerHTML = (x - padding - 2) + "px";
+            hguide.style.top = y + "px";
+            hguide.innerHTML = (y - padding) + "px";
+        });
+    </script>
+</body>
+</html>
