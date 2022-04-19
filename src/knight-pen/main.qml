@@ -6,47 +6,32 @@ import QtQuick.Layouts 1.15
 import Qt.labs.platform 1.1
 import QtQml 2.15
 
-import knight.pen.utils 1.0
 import knight.pen.window 1.0
 
-import 'Windows'
-import 'Controls'
-import 'Forms'
+import 'windows'
+import 'controls'
+import 'forms'
 
-TileMaskWindow {
+MaskWindow {
     id: window
 
-    width: 300; height: 300
+    x: Screen.width - width - 20
+    width: 308; height: 308
     visible: true
-
-    /// mask configuration begin
-    rows: 11
-    columns: 11
-    transposed: mainform.flow === Grid.TopToBottom ?
-                    TileMaskWindow.None : TileMaskWindow.SecondaryTranspose
-    function setMaskRow(row, val) {
-        let to = [0, 0, 7, 4, 0, 0, 0, 2, 6, 0, 0];
-        window.setMaskArea(row, 10 - to[row], row, 9, val);
-    }
-    Component.onCompleted: { window.setMaskArea(0, 10, 10, 10); }
-    /// mask configuration end
 
     Item {
         anchors.fill: parent
-        MainForm {
+        MainTools {
             id: mainform
-            anchors {
-                top: parent.top
-                right: parent.right
-                rightMargin: 2
-                topMargin: 2
-            }
+            anchors { top: parent.top; right: parent.right }
+            anchors.onRightChanged: window.update() // NOTE: to update maskWindow
         }
     }
 
     HelpWindow { id: help }
     ConfigurationWindow { id: configuration }
 
+    // Drags main window.
     DragHandler {
         target: null
         dragThreshold: 1
@@ -58,10 +43,16 @@ TileMaskWindow {
     }
 
     SystemTrayIcon {
+        id: tryIcons
         visible: true
-        icon.source: "Resources/Icons/icon-light.svg"
+        icon.source: "resources/Icons/icon-light.svg"
+        tooltip: "%1\nstatus: %2\ncanvas: %3"
+                        .arg("Knight pen v0.2.0")
+                        .arg(window.visible ? qsTr("hidden") : qsTr("visible"))
+                        .arg(mainform.canvasWindow.acceptInputs ? qsTr("on") : qsTr("off"));
+
         onActivated: {
-            if(reason === SystemTrayIcon.Trigger){
+            if(reason === SystemTrayIcon.Trigger) {
                 window.visible = true
                 window.show()
             }
@@ -76,6 +67,15 @@ TileMaskWindow {
             MenuItem {
                 text: qsTr("Configuration")
                 onTriggered: configuration.visible = true
+            }
+
+            MenuItem {
+                text: qsTr("* Update")
+                visible: false
+                onTriggered: {
+                    configuration.visible = true
+                    configuration.tabIndex = 1
+                }
             }
 
             MenuItem {

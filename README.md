@@ -1,7 +1,7 @@
 # Knight Pen
-<img src="https://img.shields.io/badge/version-0.1.1-37c248"><br>
+<img src="https://img.shields.io/badge/version-0.2.0-37c248"><br>
 
-A simple screen annotation software.
+An easy-to-use screen annotation program.
 
 <div align="center">
     <img src="extera/logo/logo-name-knight-pen.webp" width="400px">
@@ -32,7 +32,6 @@ A simple screen annotation software.
     make
 
 ## TO-DO
-- [ ] Fix mask problem in custom <a href="./src/knight-pen/maskwindow.h">window</a>.
 - [ ] Add other pen & brush tools.
 - [ ] Capability to move selection.
 - [ ] Capability to rotate selection.
