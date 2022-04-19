@@ -30,8 +30,8 @@ Item {
     implicitHeight: 50
 
     property color color: '#000'
-    property real radius: effect.shadow
-    property real spread: effect.shadow
+    property real radius: 6
+    property real spread: 3
 
     ShaderEffect {
         id: effect
@@ -49,7 +49,6 @@ Item {
         }
 
         fragmentShader: "
-            #version 330
             varying highp vec2 qt_TexCoord0;
             uniform highp float qt_Opacity;
             uniform highp float radius;

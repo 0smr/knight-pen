@@ -9,5 +9,4 @@ QQ215.Grid {
     columns: flow == QQ215.Grid.TopToBottom ? preferredRows : -1
     rows: flow == QQ215.Grid.TopToBottom ? -1 : preferredRows
     layoutDirection: Qt.RightToLeft
-    spacing: 1
 }

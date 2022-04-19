@@ -11,6 +11,9 @@
 #include <QIcon>
 #include <QRgb>
 
+#include <cmath>
+#include <map>
+
 class utils : public QObject {
     Q_OBJECT
 public:
@@ -19,10 +22,6 @@ public:
         POINT_SELECT,
     };
     Q_ENUM(CursorShapes)
-
-    explicit utils(QObject *parent = nullptr) : QObject{parent} {
-        mScreens = QGuiApplication::screens();
-    }
 
     /**
      * @brief pickColorAt
@@ -59,13 +58,44 @@ public:
         return QGuiApplication::applicationVersion();
     }
 
+    Q_INVOKABLE QString timeToShortStr(float milisecond) {
+        std::vector<std::pair<QString, float>> timeTable {
+            {"day", 86400000}, {"hour", 3600000}, {"minute", 60000}, {"second", 1000}, {"milisec", 1},
+        };
+
+        for(const auto &timeFormat : timeTable) {
+            if(milisecond > timeFormat.second) {
+                return QString("%1 %2").arg(std::floor(milisecond/timeFormat.second))
+                                       .arg(timeFormat.first);
+            }
+        }
+
+        return "a bit";
+    }
+
+    static utils* getInstance() {
+        return instance != nullptr ? instance : new utils();
+    }
+
+    static QObject* qmlSingletoProvider(QQmlEngine *engine, QJSEngine *scriptEngine) {
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
+        return utils::getInstance();
+    }
+
 private:
+    explicit utils(QObject *parent = nullptr) : QObject{parent} {
+        mScreens = QGuiApplication::screens();
+    }
+
+    static inline utils* instance = nullptr;
+
     std::map<utils::CursorShapes, QCursor> mCursorShapes;
     QList<QScreen *> mScreens;
     QPixmap mScreenPixmap;
 };
 
-static void registerKPUtilsTYpe() {
-    qmlRegisterType<utils>("knight.pen.utils", 1, 0, "Utils");
+static void registerKPUtilsType() {
+    qmlRegisterSingletonType<utils>("knight.pen.utils", 1, 0, "Utils", utils::qmlSingletoProvider);
 }
-Q_COREAPP_STARTUP_FUNCTION(registerKPUtilsTYpe)
+Q_COREAPP_STARTUP_FUNCTION(registerKPUtilsType)

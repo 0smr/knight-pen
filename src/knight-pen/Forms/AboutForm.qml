@@ -3,7 +3,7 @@ import QtQuick.Controls 2.15
 
 import knight.pen.utils 1.0
 
-import '../Controls'
+import '../controls'
 
 ScrollView {
     id: control
@@ -14,15 +14,13 @@ ScrollView {
 
     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-    Utils { id: utils }
-
     RichText {
         text:
             `<style>
                 a { color: #55f; text-decoration: none }
                 p { margin: 2px }
             </style>
-            <h1>Knight Pen <small> ${utils.applicationVersion()} </small></h1>
+            <h1>Knight Pen <small> ${Utils.applicationVersion()} </small></h1>
             <p>A simple screen annotation software.</p>
             <p>Based on
             <a href='https://www.qt.io'>Qt</a> &

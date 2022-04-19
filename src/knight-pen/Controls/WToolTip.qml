@@ -6,24 +6,32 @@ Item {
     id: control
 
     property alias delay: delayTimer.interval
-    property alias text: tooltiptext.text
-    property alias font: tooltiptext.font
-    property alias contentItem: tooltiptext
     property alias timeout: timeoutTimer.interval
+    property alias contentItem: innerControl.contentItem
+    property alias background: innerControl.background
+
+    property string text: ''
+    property font font: { font.pointSize = 8; font.famimly = 'Calibri'  }
+    property real offset: 0
+    property real align: Qt.AlignRight
+
+    signal finished()
 
     function terminate() {
         delayTimer.stop();
         timeoutTimer.stop();
     }
 
+    function restart() {
+        delayTimer.stop();
+        timeoutTimer.stop();
+        delayTimer.restart();
+    }
+
     visible: false
     onVisibleChanged: {
-        if(visible) {
-            delayTimer.restart();
-        }
-        else {
-            terminate();
-        }
+        if(visible) delayTimer.restart();
+        else terminate();
     }
 
     Timer {
@@ -31,10 +39,11 @@ Item {
         interval: 500
 
         onTriggered: {
-            let coord = mapToGlobal(0, 0);
+            const offset = control.offset -
+                           (control.align == Qt.AlignRight ? 0 : innerControl.width)
+            const coord = mapToGlobal(offset, 0);
             win.x = Math.min(coord.x + 5, Screen .width - win.width - 10);
             win.y = Math.min(Math.max(10, coord.y - 10), Screen.height - win.height - 10);
-
             timeoutTimer.restart();
         }
     }
@@ -48,21 +57,32 @@ Item {
         id: win
         width: tooltiptext.width
         height: tooltiptext.height
-        visible: control.visible && timeoutTimer.running && tooltip.text;
+        visible: control.visible && timeoutTimer.running && tooltiptext.text;
         color: 'transparent'
         flags: Qt.FramelessWindowHint | Qt.WindowTransparentForInput
 
-        Rectangle {
-            anchors.fill: parent
-            color: '#f8f9fa'
-            border { color: '#e9ecef'; width: 1 }
-            radius: 2
-            Text {
+        onVisibleChanged: {
+            if(!visible) {
+                control.finished();
+            }
+        }
+
+        Control {
+            id: innerControl
+            width: tooltiptext.implicitWidth
+            height: tooltiptext.implicitHeight
+            contentItem: Text {
                 id: tooltiptext
-                text: ''
+                text: control.text
+                font: control.font
                 color: 'gray'
                 padding: 5
-                font.pixelSize: 10
+            }
+
+            background: Rectangle {
+                color: '#f8f9fa'
+                border { color: '#e9ecef'; width: 1 }
+                radius: 2
             }
         }
     }
