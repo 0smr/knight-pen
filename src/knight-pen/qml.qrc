@@ -51,12 +51,12 @@
         <file>controls/ToolTip.qml</file>
         <file>controls/WToolTip.qml</file>
         <file>resources/Font/knight-icon-solid.ttf</file>
-        <file>controls/interactive icons/Spinner.qml</file>
+        <file>controls/interactive icons/BusyIndicator.qml</file>
         <file>controls/Guide.qml</file>
         <file>controls/Label.qml</file>
         <file>controls/TextButton.qml</file>
         <file>controls/WideRow.qml</file>
-        <file>controls/HelpSpot.qml</file>
+        <file>windows/HelpSpot.qml</file>
         <file>controls/AnimatedText.qml</file>
     </qresource>
 </RCC>
