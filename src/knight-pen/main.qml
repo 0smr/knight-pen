@@ -17,6 +17,7 @@ MaskWindow {
 
     x: Screen.width - width - 20
     width: 308; height: 308
+    sectorSize: Qt.size(width/11, height/11)
     visible: true
 
     Item {

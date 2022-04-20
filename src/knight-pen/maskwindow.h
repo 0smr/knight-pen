@@ -14,8 +14,9 @@ class maskWindow : public QQuickWindow {
     Q_PROPERTY(QSize sectorSize READ sector WRITE setSector NOTIFY sectorChanged)
 public:
     maskWindow() : mSector(28, 28) {
-        setFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Widget);
-        setColor(Qt::transparent);
+        setFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+        // Change to red color instead of Qt::transparent in case of error.
+        setColor("#11FF0000");
     }
 
     void resizeEvent(QResizeEvent *event) override {
@@ -57,7 +58,7 @@ public slots:
                 QPoint topLeft(sectorWidth * i, sectorHeight * j);
                 QPoint center = (topLeft + QPoint(sectorWidth/2, sectorHeight/2));
 
-                if(qAlpha(windowImage.pixel(center.x(), center.y()))) {
+                if(qAlpha(windowImage.pixel(center.x(), center.y())) > 128) {
                     region = region.united(QRegion(QRect(topLeft, mSector)));
                 }
             }

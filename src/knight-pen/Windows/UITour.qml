@@ -4,9 +4,12 @@ import QtQuick.Window 2.12
 Window {
     id: window
 
+    width: Screen.width
+    height: Screen.height
+
     color: 'transparent'
     visibility: Window.Hidden
-    flags: Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
+    flags: Qt.Window | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
 
     /**
      * Array of
@@ -16,7 +19,7 @@ Window {
     property int index: -1
     property int radius: 25
 
-    function next(startIndex = undefined, textMesssage = undefined) {
+    function showNextMessage(startIndex = undefined, textMesssage = undefined) {
         index = startIndex || index + 1;
 
         if(index < messages.length) {
@@ -58,7 +61,7 @@ Window {
         target: (messages[index] || {}).target || fake
         ignoreUnknownSignals: true
 
-        function onClicked() { window.next() }
+        function onClicked() { window.showNextMessage() }
     }
 
     ParallelAnimation {
