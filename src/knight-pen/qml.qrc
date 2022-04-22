@@ -7,11 +7,11 @@
         <file>controls/Hamburger.qml</file>
         <file>controls/Grid.qml</file>
         <file>windows/ColorPickerWindow.qml</file>
-        <file>resources/Icons/icon-dark.svg</file>
-        <file>resources/Icons/icon-light.svg</file>
+        <file>resources/icons/icon-dark.svg</file>
+        <file>resources/icons/icon-light.svg</file>
         <file>controls/InteractiveCanvas.qml</file>
-        <file>resources/Cursor/DirectSelection.svg</file>
-        <file>resources/Cursor/Selection.svg</file>
+        <file>resources/cursor/directSelection.svg</file>
+        <file>resources/cursor/selection.svg</file>
         <file>windows/CanvasWindow.qml</file>
         <file>controls/WToolTip.qml</file>
         <file>controls/ToolLabel.qml</file>
@@ -50,7 +50,7 @@
         <file>controls/ToolButton.qml</file>
         <file>controls/ToolTip.qml</file>
         <file>controls/WToolTip.qml</file>
-        <file>resources/Font/knight-icon-solid.ttf</file>
+        <file>resources/font/knight-icon-solid.ttf</file>
         <file>controls/interactive icons/BusyIndicator.qml</file>
         <file>controls/Guide.qml</file>
         <file>controls/Label.qml</file>
@@ -58,5 +58,6 @@
         <file>controls/WideRow.qml</file>
         <file>windows/UITour.qml</file>
         <file>controls/AnimatedText.qml</file>
+        <file>controls/MDText.qml</file>
     </qresource>
 </RCC>

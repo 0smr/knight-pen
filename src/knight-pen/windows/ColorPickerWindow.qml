@@ -9,7 +9,6 @@ Window {
 
     color: 'transparent'
     visibility: Window.Hidden
-    flags: Qt.Widget
 
     signal colorSelected(color selectedColor, bool valid);
 

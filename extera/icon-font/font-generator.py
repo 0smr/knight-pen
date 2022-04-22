@@ -47,7 +47,7 @@ if __name__ == '__main__':
     sfdFont.generate(baseName) # generate '.ttf' font.
 
     # copy the ttf file to the app resources folder and replace the old one.
-    shutil.copy2(baseName, '../../src/knight-pen/resources/Font/')
+    shutil.copy2(baseName, '../../src/knight-pen/resources/font/')
 
     # remove the generated font files.
     # os.remove(baseName)

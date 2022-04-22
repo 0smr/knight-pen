@@ -1,20 +1,21 @@
-# Knight Pen
+# <img src="extera/icon-font/svg/e006-knight_pen.svg" width="22px"></img> Knight Pen 
 <img src="https://img.shields.io/badge/version-0.2.0-37c248"><br>
 
 An easy-to-use screen annotation program.
 
 <div align="center">
-    <img src="extera/logo/logo-name-knight-pen.webp" width="400px">
+    <img src="extera/logo/knight-pen-character_character.svg" width="400px" height="400px"> <br>
+    <i><small>Knight Pen</small></i>
 </div>
 <br>
 
 <!-- # Preview -->
 
-## Compiling
+## Compile
 
 **Dependencies**
 
-`Qt >= 5.15` - `GCC >= 8.0` - `qmake >= 3.1`.
+`Qt >= 5.15`, `GCC >= 8.0`, `qmake >= 3.1`.
 
     sudo apt-get install g++ build-essential qt5-default qttools5-dev qttools5-dev-tools qtdeclarative5-dev*
 

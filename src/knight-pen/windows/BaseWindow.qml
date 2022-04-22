@@ -60,7 +60,7 @@ Window {
 
     FontLoader {
         id: knightFont
-        source: '../resources/Font/knight-icon-solid.ttf'
+        source: '../resources/font/knight-icon-solid.ttf'
     }
 
     Page {
