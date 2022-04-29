@@ -3,25 +3,48 @@
 #include <QQuickItem>
 #include <QGuiApplication>
 
+#include <QDesktopServices>
 #include <QFontDatabase>
+#include <QSettings>
+#include <QProcess>
 #include <QScreen>
 #include <QCursor>
 #include <QPixmap>
+#include <QString>
 #include <QImage>
 #include <QIcon>
+#include <QDir>
 #include <QRgb>
 
+#include <vector>
 #include <cmath>
 #include <map>
 
 class utils : public QObject {
     Q_OBJECT
+    Q_PROPERTY(Platform platform READ platform CONSTANT)
+
 public:
+    enum Platform {
+        Windows,
+        Linux,
+        Mac,
+        Other,
+    };
+    Q_ENUM(Platform) ///> Add platform enum type.
+
     enum CursorShapes {
         SHAPE_SELECT,
         POINT_SELECT,
     };
     Q_ENUM(CursorShapes)
+
+    enum ThemeType {
+        Light,
+        Dark,
+        None,
+    };
+    Q_ENUM(ThemeType)
 
     /**
      * @brief pickColorAt
@@ -58,6 +81,15 @@ public:
         return QGuiApplication::applicationVersion();
     }
 
+    Q_INVOKABLE bool osLightModeEnabled() {
+        if(PLATFORM == Platform::Windows) {
+            QSettings setting("HKEY_URRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
+            return setting.value("SystemUsesLightTheme").toBool();
+        }
+
+        return false; //> in case of error or unknown os.
+    }
+
     Q_INVOKABLE QString timeToShortStr(float milisecond) {
         std::vector<std::pair<QString, float>> timeTable {
             {"day", 86400000}, {"hour", 3600000}, {"minute", 60000}, {"second", 1000}, {"milisec", 1},
@@ -70,7 +102,26 @@ public:
             }
         }
 
-        return "a bit";
+        return "a moment";
+    }
+
+    Q_INVOKABLE bool openFileInExplorer(QString filePath) {
+        if(PLATFORM == Platform::Windows) {
+            QStringList args;
+            args << "/select," << QDir::toNativeSeparators(filePath);
+            return QProcess::startDetached("explorer", args);
+        } else if(PLATFORM == Platform::Mac) {
+            QStringList args;
+            args << "-e" << "tell application \"Finder\""
+                 << "-e" << "activate"
+                 << "-e" << "select POSIX file \"" + filePath + "\""
+                 << "-e" << "end tell";
+            return QProcess::startDetached("osascript", args);
+        } else if(PLATFORM == Platform::Linux) {
+            return QDesktopServices::openUrl(filePath);
+        } else {
+            return false;
+        }
     }
 
     static utils* getInstance() {
@@ -83,6 +134,17 @@ public:
         return utils::getInstance();
     }
 
+    Platform platform() const { return PLATFORM; }
+
+#if defined(WIN64) || defined(_WIN64) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    static inline const Platform PLATFORM = Platform::Windows;
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+    static inline const Platform PLATFORM = Platform::Linux;
+#elif defined(__APPLE__) || defined(__MACH__)
+    static inline const Platform PLATFORM = Platform::Mac;
+#else
+    static inline const Platform PLATFORM = Platform::Other;
+#endif
 private:
     explicit utils(QObject *parent = nullptr) : QObject{parent} {
         mScreens = QGuiApplication::screens();

@@ -51,7 +51,6 @@
         <file>controls/ToolTip.qml</file>
         <file>controls/WToolTip.qml</file>
         <file>resources/font/knight-icon-solid.ttf</file>
-        <file>controls/interactive icons/BusyIndicator.qml</file>
         <file>controls/Guide.qml</file>
         <file>controls/Label.qml</file>
         <file>controls/TextButton.qml</file>
@@ -59,5 +58,12 @@
         <file>windows/UITour.qml</file>
         <file>controls/AnimatedText.qml</file>
         <file>controls/MDText.qml</file>
+        <file>resources/font/Courier Prime Code Italic.ttf</file>
+        <file>resources/font/Courier Prime Code.ttf</file>
+        <file>resources/font/Carlito-Bold.ttf</file>
+        <file>resources/font/Carlito-Regular.ttf</file>
+        <file>controls/qmldir</file>
+        <file>controls/animated-icons/BusyIndicator.qml</file>
+        <file>controls/KnightPen.qml</file>
     </qresource>
 </RCC>

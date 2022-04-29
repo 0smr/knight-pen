@@ -3,6 +3,7 @@
 #include <QQmlApplicationEngine>
 #include <QGuiApplication>
 #include <QObject>
+#include <QtCore>
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -17,6 +18,8 @@
 #include <QFile>
 #include <QDir>
 
+#include "utils.h"
+
 struct githubRelease {
     Q_GADGET
     Q_PROPERTY(int commitIndex MEMBER mTotalCommit)
@@ -24,7 +27,7 @@ struct githubRelease {
     Q_PROPERTY(QString dscription MEMBER mDscription)
     Q_PROPERTY(QString commitHash MEMBER mCommitHash)
     Q_PROPERTY(QString dateTime MEMBER mDateTime)
-    Q_PROPERTY(QVariant assets MEMBER mAsset)
+    Q_PROPERTY(QVariant asset MEMBER mAsset)
 public:
     int mTotalCommit;
     QString mTagName;
@@ -45,7 +48,10 @@ public:
     enum UpdateState { None, HasUpdate };
     Q_ENUM(UpdateState)
 
-    updater(QObject *parent = nullptr) : QObject(parent) {}
+    updater(QObject* parent = nullptr)
+        : QObject(parent), mDownloadReply(nullptr), mCheckReply(nullptr), mBaseDir("updates"){
+        mNetworkManager.setAutoDeleteReplies(true);
+    }
 
     Q_INVOKABLE void checkForUpdates(int releaseOffset = 1) {
         QString graphQLQuery = QString(
@@ -64,19 +70,19 @@ public:
                               {"query", QJsonValue(graphQLQuery)}
                           }).toJson();
 
-        /// this url is a bridge to: https://api.github.com/graphql
-        /// but no need to create authorization token.
+        /// Without the need to obtain an authorization token,
+        /// this link creates a bridge to: https://api.github.com/graphql.
         QNetworkRequest req(QUrl("https://s-m-r.ir/API/github/graphQLBridge.php"));
         req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-        checkBuffer = "";
-        QNetworkReply *reply = netManager.post(req, jsonString);
+        mCheckBuffer = "";
+        mCheckReply = mNetworkManager.post(req, jsonString);
 
         setChecking(true);
 
-        QObject::connect(reply, &QNetworkReply::readyRead, this, &updater::checkForUpdateReadyRead);
-        QObject::connect(reply, &QNetworkReply::finished, this, &updater::checkForUpdateFinished);
-        QObject::connect(reply, &QNetworkReply::errorOccurred, this, &updater::downloadUpdateError);
+        QObject::connect(mCheckReply, &QNetworkReply::readyRead, this, &updater::checkForUpdateReadyRead);
+        QObject::connect(mCheckReply, &QNetworkReply::finished, this, &updater::checkForUpdateFinished);
+        QObject::connect(mCheckReply, &QNetworkReply::errorOccurred, this, &updater::checkForUpdateError);
     }
 
     Q_INVOKABLE void downloadUpdate(QUrl url) {
@@ -84,15 +90,15 @@ public:
         req.setHeader(QNetworkRequest::ContentTypeHeader, "application/zip");
         req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-        downloadBuffer = "";
-        QNetworkReply *reply = netManager.get(req);
+        mDownloadBuffer = "";
+        mDownloadReply = mNetworkManager.get(req);
 
         setDownloading(true);
 
-        QObject::connect(reply, &QNetworkReply::readyRead, this, &updater::downloadUpdateReadyRead);
-        QObject::connect(reply, &QNetworkReply::finished, this, &updater::downloadFileFinished);
-        QObject::connect(reply, &QNetworkReply::errorOccurred, this, &updater::checkForUpdateError);
-        QObject::connect(reply, &QNetworkReply::downloadProgress, this, &updater::fileDownloadProgress);
+        QObject::connect(mDownloadReply, &QNetworkReply::readyRead, this, &updater::downloadUpdateReadyRead);
+        QObject::connect(mDownloadReply, &QNetworkReply::finished, this, &updater::downloadFileFinished);
+        QObject::connect(mDownloadReply, &QNetworkReply::errorOccurred, this, &updater::downloadUpdateError);
+        QObject::connect(mDownloadReply, &QNetworkReply::downloadProgress, this, &updater::fileDownloadProgress);
     }
 
     const QDir &baseDir() const { return mBaseDir; }
@@ -116,7 +122,6 @@ public:
     }
 
 private:
-#define APP_VERSION "1.0"
     bool isNewVersion(QString otherVersion) {
         auto const taga = QString(APP_VERSION);
         auto const tagb = otherVersion;
@@ -144,26 +149,24 @@ private:
     }
 
     void checkForUpdateReadyRead() {
-        QNetworkReply *reply = dynamic_cast<QNetworkReply *>(QObject::sender());
-        checkBuffer.append(reply->readAll());
+        mCheckBuffer.append(mCheckReply->readAll());
     }
 
     void checkForUpdateFinished() {
-        #if defined Q_OS_LINUX
-            const char *os = "linux";
-        #elif defined Q_OS_WINDOWS
-            const char *os = "win";
-        #elif defined Q_OS_MACOS
-            const char *os = "macos";
-        #else
-            const char *os = "";
-        #endif
+        QString platformOS = "";
+        switch(utils::PLATFORM) {
+            case utils::Windows: platformOS = "win"; break;
+            case utils::Linux: platformOS = "linux"; break;
+            case utils::Mac: platformOS = "mac"; break;
+            case utils::Other: return;
+            default: break;
+        }
 
-        QJsonObject respons = QJsonDocument::fromJson(checkBuffer).object();
+        QJsonObject response = QJsonDocument::fromJson(mCheckBuffer).object();
 
-        QJsonValue message = respons["message"];
-        QJsonValue error = respons["error"];
-        QJsonValue data = respons["data"];
+        QJsonValue message = response["message"];
+        QJsonValue error = response["error"];
+        QJsonValue data = response["data"];
 
         // if both error and message are NULL.
         if(error.type() == QJsonValue::Null && message.type() == QJsonValue::Null) {
@@ -178,7 +181,7 @@ private:
             release.mDscription = lastNode["description"].toString();
 
             for(const auto &asset: assets) {
-                if(QJsonValue(asset)["name"].toString().contains(os)) { //> checks to see if the asset name contains the os name.
+                if(QJsonValue(asset)["name"].toString().contains(platformOS)) { //> checks to see if the asset name contains the os name.
                     release.mAsset = asset.toVariant();
                     break;
                 }
@@ -200,7 +203,7 @@ private:
 
     void downloadUpdateReadyRead() {
         QNetworkReply *reply = dynamic_cast<QNetworkReply *>(QObject::sender());
-        downloadBuffer.append(reply->readAll());
+        mDownloadBuffer.append(reply->readAll());
     }
 
     void downloadUpdateError(QNetworkReply::NetworkError error) {
@@ -209,22 +212,31 @@ private:
     }
 
     void downloadFileFinished() {
-        QFile downloadFile(mBaseDir.filePath("file.zip") );
-        downloadFile.open(QFile::WriteOnly);
-        downloadFile.write(downloadBuffer);
-        downloadFile.close();
-        emit fileDownloaded("");
+        QString rawHeader = mDownloadReply->rawHeader("Content-Disposition");
+        QString fileName = rawHeader.mid(rawHeader.indexOf("filename=") + 9);
+        QFile downloadFile(mBaseDir.filePath(fileName));
+
+        mBaseDir.mkpath(".");
+        if(mDownloadReply->error() == QNetworkReply::NoError && downloadFile.open(QFile::WriteOnly) == true) {
+            downloadFile.write(mDownloadBuffer);
+            downloadFile.close();
+            emit fileDownloaded(mBaseDir.filePath(fileName)); //> Emit path to file as "filePath"
+        }
         setDownloading(false);
     }
 
 public slots:
+    void abort() {
+        if(mDownloading && mDownloadReply) mDownloadReply->abort();
+        if(mChecking && mCheckReply) mCheckReply->abort();
+    }
 
 signals:
     void updateAvaliable(githubRelease release);
     void updateCheckFaild(QString message);
     void updateCheckFinished(updater::UpdateState update);
 
-    void fileDownloaded(QString basename);
+    void fileDownloaded(QString filePath);
     void fileDwonloadFaild(QString message);
     void fileDownloadProgress(qint64 recived, qint64 total);
     void baseDirChanged();
@@ -232,9 +244,11 @@ signals:
     void downloadingChanged();
 
 private:
-    QNetworkAccessManager netManager;
-    QByteArray checkBuffer;
-    QByteArray downloadBuffer;
+    QNetworkAccessManager mNetworkManager;
+    QNetworkReply *mDownloadReply;
+    QNetworkReply *mCheckReply;
+    QByteArray mDownloadBuffer;
+    QByteArray mCheckBuffer;
     QDir mBaseDir;
 
     bool mDownloading = false;
@@ -246,4 +260,3 @@ static void registerKPUpdaterType() {
     qmlRegisterType<updater>("knight.pen.updater", 1, 0, "Updater");
 }
 Q_COREAPP_STARTUP_FUNCTION(registerKPUpdaterType)
-

@@ -7,6 +7,7 @@ import Qt.labs.platform 1.1
 import QtQml 2.15
 
 import knight.pen.window 1.0
+import knight.pen.utils 1.0
 
 import 'windows'
 import 'controls'
@@ -46,7 +47,10 @@ MaskWindow {
     SystemTrayIcon {
         id: tryIcons
         visible: true
-        icon.source: "resources/Icons/icon-light.svg"
+        icon.source: {
+            return Utils.osLightModeEnabled() ? "resources/icons/icon-dark.svg" :
+                                                "resources/icons/icon-light.svg";
+        }
         tooltip: "%1\nstatus: %2\ncanvas: %3"
                         .arg("Knight pen v0.2.0")
                         .arg(window.visible ? qsTr("hidden") : qsTr("visible"))
@@ -54,8 +58,8 @@ MaskWindow {
 
         onActivated: {
             if(reason === SystemTrayIcon.Trigger) {
-                window.visible = true
-                window.show()
+                window.visible = true;
+                window.show();
             }
         }
 
@@ -66,22 +70,28 @@ MaskWindow {
             }
 
             MenuItem {
-                text: qsTr("Configuration")
-                onTriggered: configuration.visible = true
+                text: qsTr("Save")
+                onTriggered: help.visible = true;
+                enabled: false
             }
 
             MenuItem {
-                text: qsTr("* Update")
-                visible: false
+                text: qsTr("Configuration")
+                onTriggered: configuration.visible = true;
+            }
+
+            MenuItem {
+                text: qsTr("Update Available")
+                visible: configuration.updateAssetUrl
                 onTriggered: {
-                    configuration.visible = true
-                    configuration.tabIndex = 1
+                    configuration.visible = true;
+                    configuration.tabIndex = 1;
                 }
             }
 
             MenuItem {
                 text: qsTr("Help")
-                onTriggered: help.visible = true
+                onTriggered: help.visible = true;
             }
 
             MenuItem {

@@ -16,7 +16,8 @@ public:
     maskWindow() : mSector(28, 28) {
         setFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
         // Change to red color instead of Qt::transparent in case of error.
-        setColor("#11FF0000");
+        setColor(qRgba64(0xaa, 0xaa, 0xff, 0x11));
+        updateMask();
     }
 
     void resizeEvent(QResizeEvent *event) override {

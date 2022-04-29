@@ -405,7 +405,7 @@ public slots:
             /// pathes can be closed in two condition:
             /// 1. path must contain more than 2 point.
             /// 2. distance between tail and head must be lower than 3 pixel.
-            if(QLineF(point, path->at(0)).length() < 3 && path->size() >= 3) {
+            if(QLineF(point, path->at(0)).length() < 5 && path->size() >= 3) {
                 path->setClosed(true);
                 stopDrawing();
             } else {

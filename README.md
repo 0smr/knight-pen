@@ -11,7 +11,7 @@ An easy-to-use screen annotation program.
 
 <!-- # Preview -->
 
-## Compile
+## Building from source
 
 **Dependencies**
 
@@ -39,8 +39,11 @@ An easy-to-use screen annotation program.
 - [ ] Capability to resize selection.
 - [ ] Capability to translate selection.
 - [ ] Capability to intersect shapes.
+- [ ] Separate the current shape drawing from all other solid shapes to improve rendering.
 - [ ] Move InteractiveCanvas component to separate repository.
 - [ ] Port to cmake.
+- [ ] Use [traypp](https://github.com/Soundux/traypp) ([Qt BUG](https://bugreports.qt.io/browse/QTBUG-37083)).
+- [ ] Fix [WToolTip](src/knight-pen/controls/WToolTip.qml) performance issue.
 
 ## Dependencies
 - [Qt](https://www.qt.io/) (LGPLV3) <sub>Core & GUI</sub>
