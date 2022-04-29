@@ -1,5 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
+import QtQuick 2.15
+import QtQuick.Window 2.15
+
+import '../controls'
 
 Window {
     id: window
@@ -26,7 +28,7 @@ Window {
             const alignment = messages[index].align || Qt.AlignLeft;
             const message = textMesssage || messages[index].text;
             const targetItem = messages[index].target;
-            const point = targetItem.mapToGlobal(14, 14);
+            const point = targetItem.mapToGlobal(targetItem.width/2 ,targetItem.height/2);
 
             focusIn(point);
             showMessage(message, point, alignment);
@@ -36,17 +38,33 @@ Window {
         }
     }
 
-    function showMessage(message, point, align) {
+    function showMessage(message, point, alignment) {
         text.text = message;
-        text.y = point.y - text.implicitHeight/2;
-        text.x = point.x;
-        if(align === Qt.AlignLeft) {
-            text.x -= window.radius + text.implicitWidth;
-        } else {
-            text.x += window.radius;
-        }
-
+        const coord = alignTextTo(point, alignment);
+        text.x = coord.x;
+        text.y = coord.y;
         messageAnim.restart();
+    }
+
+    function alignTextTo(point, alignment) {
+        point.x -= text.implicitWidth / 2;
+        point.y -= text.implicitHeight / 2;
+
+        const xshifter = window.radius + text.implicitWidth / 2 + 20;
+        const yshifter = window.radius + text.implicitHeight / 2 + 20;
+
+        switch(alignment) {
+        case Qt.AlignLeft:
+            return { x: point.x - xshifter, y: point.y };
+        case Qt.AlignRight:
+            return { x: point.x + xshifter, y: point.y };
+        case Qt.AlignTop:
+            return { x: point.x, y: point.y - yshifter };
+        case Qt.AlignBottom:
+            return { x: point.x, y: point.y + yshifter };
+        default:
+            return point;
+        }
     }
 
     function focusIn(point, rad = 50) {
@@ -54,11 +72,11 @@ Window {
         focusAnim.restart();
     }
 
-    Item { id: fake }
+    Item { id: garbage }
 
     Connections {
         enabled: messages[index] !== undefined
-        target: (messages[index] || {}).target || fake
+        target: (messages[index] || {}).target || garbage
         ignoreUnknownSignals: true
 
         function onClicked() { window.showNextMessage() }
@@ -73,7 +91,7 @@ Window {
         }
         NumberAnimation {
             target: shader; properties: 'opacity'
-            from: 0.1; to: 0.3 ; duration: 300
+            from: 0.1; to: 0.4 ; duration: 300
         }
     }
 
@@ -85,7 +103,7 @@ Window {
 
     ShaderEffect {
         id: shader
-        opacity: 0.3
+        opacity: 0.4
         anchors.fill: parent
         property real radius
         property vector2d center
@@ -111,13 +129,8 @@ Window {
 
     Text {
         id: text
-        rightPadding: 20
         color: 'white'
         textFormat: Text.RichText
-        font {
-            family: 'Calibri'
-            pointSize: 16
-            bold: true
-        }
+        font: KnightPen.headFont
     }
 }

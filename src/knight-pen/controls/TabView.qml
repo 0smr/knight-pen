@@ -28,11 +28,10 @@ Row {
                 id: repeater
                 TabButton {
                     text: modelData.text ?? modelData
-                    iconx.font.family: 'knight'
+                    iconx.font: KnightPen.iconFont
                     iconx.text: modelData.icon ?? ""
 
-                    font.family: 'Calibri'
-                    font.pointSize: 9
+                    font: KnightPen.regularFont
 
                     display: control.width < 400 ?
                                  TabButton.IconOnly : TabButton.TextBesideIcon

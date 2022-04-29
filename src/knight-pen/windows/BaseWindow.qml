@@ -7,9 +7,9 @@ import '../controls'
 Window {
     id: window
 
-    width: 400; height: 400
+    width: 400; height: 350
     color: 'transparent'
-    flags: Qt.Window | Qt.FramelessWindowHint
+    flags: Qt.Window | Qt.FramelessWindowHint | Qt.WA_DeleteOnClose
 
     default property alias contentData: page.contentData
 
@@ -48,19 +48,10 @@ Window {
         }
     }
 
-    BoxShadow {
+    Rectangle {
         anchors.fill: parent
-        visible: !(window.visibility === Window.Maximized)
-        spread: window.active ? 10 : 15
-        color: "#55000000"
-        radius: 5
-
-        Behavior on spread { NumberAnimation { duration: 110 } }
-    }
-
-    FontLoader {
-        id: knightFont
-        source: '../resources/font/knight-icon-solid.ttf'
+        anchors.margins: 4
+        color: '#353637'
     }
 
     Page {
@@ -92,7 +83,7 @@ Window {
                     leftPadding: 3
                     color: '#ddd'
                     text: '\ue006'
-                    font.family: knightFont.name
+                    font.family: KnightPen.iconFont.family
                     verticalAlignment: Qt.AlignVCenter
                 }
 
@@ -102,23 +93,36 @@ Window {
                     leftPadding: 3
                     color: '#ddd'
                     text: 'Knight Pen'
-                    font.family: 'Calibri'
+                    font: KnightPen.regularFont
                     verticalAlignment: Qt.AlignVCenter
                 }
 
                 Item {
-                    width: header.width - title.width - logo.width - 20
+                    width: header.width - title.width - logo.width - hideBtn.width - closeBtn.width
                     height: parent.height
+                }
+
+                AbstractButton {
+                    id: hideBtn
+                    width: 20
+                    height: parent.height
+                    contentItem: Text {
+                        width: 20; text: '\ue005'; color: "#eee"
+                        font.family: KnightPen.iconFont.family
+                        verticalAlignment: Qt.AlignVCenter
+                        horizontalAlignment: Qt.AlignHCenter
+                    }
+                    background: Rectangle { color: hideBtn.hovered ? '#454647' : '#353637' }
+                    onClicked: window.hide();
                 }
 
                 AbstractButton {
                     id: closeBtn
                     width: 20
                     height: parent.height
-                    text: 'x'
                     contentItem: Text {
                         width: 20; text: 'x'; color: "#eee"
-                        font.family: knightFont.name
+                        font: KnightPen.iconFont
                         verticalAlignment: Qt.AlignVCenter
                         horizontalAlignment: Qt.AlignHCenter
                     }

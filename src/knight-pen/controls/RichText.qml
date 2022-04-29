@@ -16,9 +16,9 @@ TextArea {
     textFormat: Text.RichText
     horizontalAlignment: Text.AlignJustify
 
-    font.family: 'Calibri'
+    font: KnightPen.regularFont
 
-    onLinkActivated:  Qt.openUrlExternally(link);
+    onLinkActivated: Qt.openUrlExternally(link);
 
     MouseArea {
         anchors.fill: parent

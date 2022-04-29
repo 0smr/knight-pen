@@ -323,7 +323,7 @@ Control {
         category: 'Application'
         fileName: 'config.ini'
 
-        //property alias uiTourIndex: uiTour.index
+        property alias uiTourIndex: uiTour.index
     }
 
     UITour {
@@ -332,8 +332,8 @@ Control {
             { target: drawTools, text: "<big>Hi there</big>,<br>" +
                                        "I'm delighted to see you're using my app,<br>" +
                                        "to begin drawing, first open the tool pan." },
-            { target: lineShapeTool, text: "Good, now pick a drawing tool. &rarr;" },
-            { target: visibleCanvas, text: "Okay, now click here and begin drawing; good luck!;. &nbsp;&rarr;" },
+            { target: lineShapeTool, text: "Good, now pick a drawing tool." },
+            { target: visibleCanvas, text: "Okay, now click here and begin drawing; good luck!." },
         ]
 
         Timer {

@@ -5,7 +5,7 @@ QQC.ToolTip {
     id: control
     delay: 500
     timeout: 2500
-    font.family: 'calibri'
+    font: KnightPen.regularFont
     palette.toolTipText: 'gray'
 
     background: Rectangle {

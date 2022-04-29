@@ -5,13 +5,12 @@ import Qt.labs.settings 1.1
 import knight.pen.updater 1.0
 import knight.pen.utils 1.0
 
-import '../controls/interactive icons'
 import '../controls'
 
 BaseForm {
     id: form
 
-    property bool updateAvaliable: false;
+    property string assetUrl: "";
     property alias updater: updater
 
     onVisibleChanged: time.now = Date.now()
@@ -34,18 +33,19 @@ BaseForm {
     Updater {
         id: updater
 
-        property var assets: []
-//        Component.onCompleted: checkForUpdates();
+        Component.onCompleted: checkForUpdates();
 
         onFileDownloadProgress: {
             progressBar.value = recived/total;
-            print(recived/total);
         }
 
         onFileDownloaded: {
-            print([basename].join('/'));
-            progressBar.visible = 0;
+            logger.markdown = "### Download completed\nFile path: " + filePath;
+            statusHeader.text = "Download completed";
             progressBar.value = 0;
+            form.assetUrl = "";
+            // After downloading file, open it in file path.
+            Utils.openFileInExplorer(filePath);
         }
 
         onUpdateCheckFinished: {
@@ -55,21 +55,21 @@ BaseForm {
         }
 
         onUpdateCheckFaild: {
-            logger.text = "### Update Failed:\n\n" + message;
+            logger.markdown = "### Update Failed:" + message;
         }
 
         onFileDwonloadFaild: {
-            logger.text = "### Download Failed:\n\n" + message;
-            downloadUpdate.enabled = true;
+            logger.markdown = "### Download Failed:" + message;
+            progressBar.value = 0;
         }
 
         onUpdateAvaliable: {
             version.text = release.tagName;
             releaseDate.text = release.dateTime;
             statusHeader.text = "New update avaliable (%1).".arg(release.tagName);
-            logger.text = release.dscription;
-            appName.text = release.assets.name;
-            form.updateAvaliable = true;
+            logger.markdown = release.dscription;
+            appName.text = release.asset.name;
+            form.assetUrl = release.asset.downloadUrl;
         }
     }
 
@@ -84,9 +84,7 @@ BaseForm {
 
             Label {
                 text: 'Updater'
-                font.family: 'Calibri'
-                font.bold: true
-                font.pointSize: 9
+                font: KnightPen.boldFont
             }
 
             Grid {
@@ -94,44 +92,73 @@ BaseForm {
                 height: childrenRect.height
                 flow: Grid.LeftToRight
                 layoutDirection: Qt.LeftToRight
-                padding: 5
+                rightPadding: 5
 
-                AnimatedText {
-                    id: statusHeader
-                    width: parent.width - updateBtn.width - 5
-                    text: ''
-                    font.pointSize: 8
-                    font.family: 'Consolas'
-                    wrapMode: Label.WordWrap
+                Column {
+                    width: parent.width - updateBtn.width
+                    padding: 5
+                    spacing: 5
+                    AnimatedText {
+                        id: statusHeader
+                        width: parent.width
+                        text: 'Updater'
+                        font: KnightPen.monoFont
+                        wrapMode: Label.WordWrap
+                    }
+
+                    ProgressBar {
+                        id: progressBar
+                        width: parent.width - 10
+                        value: 0
+                        visible: value > 0
+                    }
+
+                    Text {
+                        width: implicitWidth
+                        height: implicitHeight
+                        visible: progressBar.visible
+                        text: (progressBar.value * 100).toFixed() + "%"
+                        opacity: 0.4
+                        font.family: KnightPen.regularFont.family
+                        font.pointSize: 7
+                    }
                 }
 
                 Column {
-                    width: childrenRect.width
+                    width: lastUpdateCheckLabel.width + 10
                     height: childrenRect.height
                     Button {
                         id: updateBtn
-                        width: 140
+                        width: Math.max(130, parent.width)
                         height: 40
-                        text: "Check for update"
+                        text: form.assetUrl? "Download Update" : "Check for update"
                         iconx: BusyIndicator {}
                         enableIcon: updater.checking || updater.downloading
                         onPressed: {
-                            settings.lastUpdateCheckTime = Date.now()
-                            updater.checkForUpdates();
+                            if(updater.checking || updater.downloading) {
+                                updater.abort()
+                            } else {
+                                if(form.assetUrl) {
+                                    updater.downloadUpdate(form.assetUrl);
+                                } else {
+                                    settings.lastUpdateCheckTime = Date.now()
+                                    updater.checkForUpdates();
+                                }
+                            }
                         }
                     }
 
                     Text {
+                        id: lastUpdateCheckLabel
+                        width: implicitWidth
+                        height: implicitHeight
                         text: {
                             const milisecond = time.now - settings.lastUpdateCheckTime;
                             return `last update check ${Utils.timeToShortStr(milisecond)} ago`;
                         }
                         leftPadding: 5
                         opacity: 0.4
-                        font {
-                            pointSize: 7
-                            family: 'Calibri'
-                        }
+                        font: KnightPen.subscriptFont
                     }
                 }
             }
@@ -153,15 +180,14 @@ BaseForm {
 
         GridSeprator { length: parent.width; fill: 1 }
 
-        RichText {
+        MDText {
             id: logger
 
             width: parent.width
-            font.family: 'Consolas'
-            textFormat: Text.MarkdownText
+            font: KnightPen.regularFont
             wrapMode: Text.WordWrap
             color: 'gray'
-            text: ""
+            markdown: ""
         }
     }
 }

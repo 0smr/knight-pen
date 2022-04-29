@@ -3,9 +3,7 @@ import QtQuick.Controls 2.15 as QQC
 
 QQC.Label {
     id: control
-    text: '0'
     color: '#444'
-    font.family: 'Calibri'
-    font.bold: true
+    font: KnightPen.boldFont
     verticalAlignment: Qt.AlignVCenter
 }

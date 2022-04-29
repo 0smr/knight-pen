@@ -27,8 +27,7 @@ BaseForm {
 
             Text {
                 text: 'Application Global Scale Ratio:'
-                font.family: 'Calibri'
-                font.pointSize: 9
+                font: KnightPen.regularFont
             }
 
             TextInput {

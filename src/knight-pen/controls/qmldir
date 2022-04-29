@@ -1,0 +1,28 @@
+module KnightPen
+
+# CommonFunctions   1.0 commonFunctions.js
+
+singleton KnightPen 1.0 KnightPen.qml
+
+BusyIndicator       1.0 animated-icons/BusyIndicator.qml
+AnimatedText        1.0 AnimatedText.qml
+BoxShadow           1.0 BoxShadow.qml
+Button              1.0 Button.qml
+Grid                1.0 Grid.qml
+GridSeprator        1.0 GridSeprator.qml
+Guide               1.0 Guide.qml
+Hamburger           1.0 Hamburger.qml
+InteractiveCanvas   1.0 InteractiveCanvas.qml
+KnightPen           1.0 KnightPen.qml
+Label               1.0 Label.qml
+MDText              1.0 MDText.qml
+RichText            1.0 RichText.qml
+TabButton           1.0 TabButton.qml
+TabView             1.0 TabView.qml
+TextButton          1.0 TextButton.qml
+TextInput           1.0 TextInput.qml
+ToolButton          1.0 ToolButton.qml
+ToolLabel           1.0 ToolLabel.qml
+ToolTip             1.0 ToolTip.qml
+WToolTip            1.0 WToolTip.qml
+WideRow             1.0 WideRow.qml

@@ -11,7 +11,7 @@ Item {
     property alias background: innerControl.background
 
     property string text: ''
-    property font font: { font.pointSize = 8; font.famimly = 'Calibri'  }
+    property font font: KnightPen.regularFont
     property real offset: 0
     property real align: Qt.AlignRight
 
@@ -59,7 +59,10 @@ Item {
         height: tooltiptext.height
         visible: control.visible && timeoutTimer.running && tooltiptext.text;
         color: 'transparent'
-        flags: Qt.FramelessWindowHint | Qt.WindowTransparentForInput
+        flags: Qt.FramelessWindowHint |
+               Qt.WindowTransparentForInput |
+               Qt.WindowStaysOnTopHint |
+               Qt.WA_DeleteOnClose
 
         onVisibleChanged: {
             if(!visible) {

@@ -8,6 +8,7 @@ Item {
     property alias color: displayText.color
     property alias elide: displayText.elide
     property alias wrapMode: displayText.wrapMode
+    property alias displayText: displayText
 
     implicitWidth: displayText.implicitWidth
     implicitHeight: displayText.implicitHeight
@@ -50,6 +51,6 @@ Item {
     Text {
         id: displayText
         width: parent.width
-        font.family: 'Consolas'
+        font: KnightPen.monoFont
     }
 }

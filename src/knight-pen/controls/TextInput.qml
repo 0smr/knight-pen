@@ -7,7 +7,7 @@ QQ.TextInput {
 
     clip: true
 
-    font.family: 'Calibri'
+    font: KnightPen.regularFont
 
     color: '#444'
     selectionColor: '#11000000'

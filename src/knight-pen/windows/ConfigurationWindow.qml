@@ -8,8 +8,8 @@ import '../controls'
 BaseWindow {
     id: window
 
-    property bool updateAvaliable: false
-    property alias tabIndex: tabView
+    property alias updateAssetUrl: updaterForm.assetUrl
+    property alias tabIndex: tabView.currentIndex
 
     TabView {
         id: tabView
@@ -18,7 +18,7 @@ BaseWindow {
         padding: 8
         anchors.fill: parent
 
-        currentIndex: 1
+        currentIndex: 0
 
         tabs: [
             { text:'Configuration', icon: '\ue058'},
@@ -31,6 +31,7 @@ BaseWindow {
         }
 
         UpdaterForm {
+            id: updaterForm
             width: parent.width
             height: parent.height
         }

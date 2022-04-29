@@ -6,7 +6,7 @@ QQC.Label {
     width: 28
     height: width
     text: '0'
-    font.family: 'calibri'
+    font: KnightPen.regularFont
     color: '#999'
     verticalAlignment: Qt.AlignVCenter
     horizontalAlignment: Qt.AlignHCenter

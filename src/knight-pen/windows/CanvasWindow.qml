@@ -17,6 +17,7 @@ ApplicationWindow {
 
     function toggleVisiblity() {
         if(hidden == true) {
+//            flags = Qt.Window;
             showFullScreen();
             flags = Qt.Widget;
         } else {

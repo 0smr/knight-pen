@@ -25,11 +25,8 @@ QQC.ToolButton {
               control.checked ? '#fff' : color
     }
 
-    font {
-        bold: true
-        pixelSize: width * 0.55
-        family: knightFont.name
-    }
+    font.family: KnightPen.iconFont.family
+    font.pixelSize: width * 0.53
 
     background: Rectangle {
         color: control.checked ? control.palette.highlight :
@@ -38,11 +35,6 @@ QQC.ToolButton {
     }
 
     onPressed: tooltip.terminate();
-
-    FontLoader {
-        id: knightFont
-        source: '../resources/font/knight-icon-solid.ttf'
-    }
 
     /// TODO: performance issue on tooltip activation.
     WToolTip {

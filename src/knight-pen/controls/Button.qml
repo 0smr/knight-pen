@@ -20,11 +20,7 @@ QQC.Button {
     palette.buttonText: '#444'
     palette.button: '#fff'
 
-    font {
-        pointSize: 9
-        family: 'Calibri'
-        bold: true
-    }
+    font: KnightPen.boldFont
 
     contentItem: Item {
         implicitWidth: Math.max(85, text.width + iconItem.width + spacing)
