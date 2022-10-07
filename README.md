@@ -1,9 +1,10 @@
 # <img src="extra/icon-font/svg/e006-knight_pen.svg" width="22px"></img> Knight Pen
-<img src="https://img.shields.io/github/v/tag/smr76/qloudy?sort=semver&label=version&color=313234">
-<img src="https://img.shields.io/github/license/smr76/qloudy?color=%2336b245">
-<a href="https://www.blockchain.com/bch/address/bitcoincash:qrnwtxsk79kv6mt2hv8zdxy3phkqpkmcxgjzqktwa3">
-<img src="https://img.shields.io/badge/BCH-Donate-f0992e?logo=BitcoinCash&logoColor=f0992e"></a>
-<br><br>
+<p>
+    <img src="https://img.shields.io/github/v/tag/smr76/knight-pen?sort=semver&label=version&color=313234">
+    <img src="https://img.shields.io/github/license/smr76/knight-pen?color=%2336b245">
+    <a href="https://www.blockchain.com/bch/address/bitcoincash:qrnwtxsk79kv6mt2hv8zdxy3phkqpkmcxgjzqktwa3">
+    <img src="https://img.shields.io/badge/BCH-Donate-f0992e?logo=BitcoinCash&logoColor=f0992e"></a>
+</p>
 
 An easy-to-use screen annotation program.
 
